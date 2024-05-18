@@ -1,0 +1,47 @@
+.facture_rubrique div:nth-child(1n){  /* chaque "div" enfant de classe style "rubrique" */
+    min-height 	: 30px;
+    margin-top 	: 5px;
+    text-align 	: left;
+    display 		: grid;
+    grid-template-columns : 1fr 1fr 8fr;
+    grid-gap 		: 10px; 
+}
+
+.facture_rubrique div:nth-child(1){  /* 1er enfant "div" de classe style "rubrique" */
+    grid-template-columns : 1fr 9fr; 
+}
+  
+.facture_commentaire {
+    text-align : left;
+    font-size  : 0.9em;	
+    white-space: pre;   /* sÃ©ries de blancs et sauts de ligne \r\n conservÃ©s */
+}
+  
+.facture_sousrubrique {
+    min-height 	: 30px;
+    margin-top 	: 5px;
+    text-align 	: left;
+    display 		: grid;
+    grid-template-columns : 1fr 1fr; 
+    border-bottom : 2px solid #808080;  
+}
+  
+.produit_rubrique{
+    display 	: grid;
+    grid-template-columns : 1fr 1fr; 
+}
+
+#btn_produit_valider {
+    margin : 10px;
+    width  : 50px;
+    height : 50px;
+    background:url(valider.png) no-repeat center center;
+}
+
+#btn_produit_annuler {
+    margin : 10px;
+    width  : 50px;
+    height : 50px;
+    background:url(annuler.png) no-repeat center center;
+}
+

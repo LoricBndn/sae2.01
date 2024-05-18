@@ -1,0 +1,156 @@
+body { 
+    font 				: 1em roboto;
+    color 			: #000000;
+    background-color  : #ebebeb;
+    text-align 		: left; 
+    margin 			: 0;
+}
+  
+a {
+    cursor : pointer;
+}
+  
+label {
+    margin-top 		: 0.5em;
+    font-size  		: 0.9em;
+    text-align 		: right;
+    margin-right	: 5px;
+}
+
+input {
+    height			: 1.5em;
+    border			: 1px solid #5b5b5b;
+    color 			: #000000;
+    font 				: inherit;
+    font-size			: 1em;
+    text-align		: left;
+    margin-right		: 5px;
+    padding-top		: 0.2em;
+}
+  
+input[type=button] {
+    cursor			: pointer;
+    font-size			: 1.2em;
+    border 			: none;
+    background-color	: #00b0ff;
+    color				: #000000;
+}
+  
+  
+input[type=button]:hover {
+    background-color	: #0000ff;
+    border 			: 1px solid #ffffff;
+    color				: #ffffff;
+}
+  
+input[type=button].btnannuler {
+    background-color	: #ff7000;
+}
+
+input[type=button].btnannuler:hover {
+    background-color	: #ff0000;
+    border 			: 1px solid #ffffff;
+    color				: #ffffff;
+}
+
+input[type=button].btnretour {
+    background-color  : #00ff00;
+}
+
+input[type=button].btnretour:hover {
+    background-color	: #00D000;
+    border 			: 1px solid #ffffff;
+    color				: #ffffff;
+}
+  
+select {
+    border			: solid 1px #00b0ff;
+    margin			: 0;
+    padding-left		: 15px;
+    color				: #000000;
+    cursor			: pointer;
+    font-size			: 1.1em;
+    background-color: white;
+}
+
+select option:hover {
+    background-color	: #00b0ff; 
+}  
+  
+/* titre */
+.labeltitre {
+    color 			: #ffffff;
+    background-color  : #5b5b5b;
+    font-weight 		: bold; 
+    padding-top		: 0.4em;
+    width:100%;  
+}
+  
+.labelerreur {
+    text-align    : left;
+    font-size 		: 0.9em;
+    color     		: #ff0000;
+    font-style 		: italic;
+    margin-left		: 10px;
+}
+  
+.divtitre {
+    background-color  : #5b5b5b;
+    color 			: #ffffff; 
+    height			: 30px;
+    padding-top		: 5px;
+}
+  
+.divaction {
+    margin 			: 10px;
+    float 			: right;
+}	
+  
+table {
+    margin : auto;
+    width : 100%;
+}
+    
+table, td, th{
+    border-bottom : 1px solid silver;
+    border-collapse : collapse;
+}
+    
+td, th{
+    padding-left : 5px;
+    padding-right : 5px;
+}
+    
+th {  /* couleur fond ligne entÃªte du tableau */
+    background-color: lightgray;
+}
+
+table tr {  /* couleur fond du tableau */
+    background-color : #f9f9f9;
+    height : 30px;
+} 
+
+table tr:nth-child(2n) { /* couleur fond ligne paire */
+    background-color : white;
+} 
+  
+.img_visu {
+    width : 30px;
+    height : 30px;
+    background :no-repeat center url(visu.png);
+    display: block;
+}
+
+.img_modification {
+    width : 30px;
+    height : 30px;
+    background :no-repeat center url(modification.png);
+    display: block;
+}
+
+.img_corbeille {
+    width : 30px;
+    height : 30px;
+    background :no-repeat center url(corbeille.png);
+    display: block
+}

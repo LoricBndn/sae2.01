@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Edition d'une facture</title>
+    <link type="text/css" rel="stylesheet" href="./css/sae.css">
+    <link type="text/css" rel="stylesheet" href="./css/facture_edit.css">
+</head>
+
+<body>
+    <div id="div_facture_titre" class="divtitre">Détail d'une facture</div>
+    <div id="div_facture_detail">
+        <div class="facture_rubrique">
+            <div>
+                <span class="labeltitre">IDENTIFICATION</span>
+                <label id="lbl_erreur_num" class="labelerreur"></label>
+            </div>
+            <div>
+                <label for="edt_facture_num">Numéro</label>
+                <span><input id="edt_facture_num" placeholder="n° facture" maxlength="5" size="5" type="text"></span>
+                <span><label id="lbl_erreur_date" class="labelerreur"></label></span>
+            </div>
+            <div>
+                <label for="edt_facture_date">le</label>
+                <span><input id="edt_facture_date" size="10" type="date"></span>
+                <span> <textarea id="edt_commentaire" rows="3"></textarea></span>
+            </div>
+        </div>
+        <div class="facture_rubrique">
+            <div>
+                <span class="labeltitre">CLIENT</span>
+                <label id="lbl_erreur_client" class="labelerreur"></label>
+            </div>
+            <div>
+                <label for="edt_facture_codeclient">Code</label>
+                <span><input id="edt_facture_codeclient" placeholder="code client" size="5" type="text"></span>
+                <label id="lbl_facture_detail_client" class="facture_commentaire"></label>
+            </div>
+        </div>
+        <div class="facture_rubrique">
+            <div>
+                <span class="labeltitre">INFOS COMMERCIALES</span>
+                <label id="lbl_erreur_liv" class="labelerreur"></label>
+            </div>
+            <div>
+                <label for="edt_facture_liv">Livraison</label>
+                <span>
+                    <select id="select_livraison"></select>
+                </span>
+                <label id="lbl_facture_detail_liv" class="facture_commentaire"></label>
+            </div>
+            <div>
+                <label for="edt_facture_remise">Remise</label>
+                <span>
+                    <input type="number" id="edt_experience" size="1"/>%
+                </span>
+                <span><label id="lbl_erreur_remise" class="labelerreur"></label></span>
+            </div>
+        </div>
+        <div class="facture_rubrique">
+            <div> 
+                <span class="labeltitre">PRODUITS</span>
+                <label id="lbl_erreur_produit" class="labelerreur"></label>
+            </div>
+        </div>
+        <div class="facture_sousrubrique">
+            <div id="div_facture_produit">
+                <div class="divtitre">
+                    HT :
+                    <label id="lbl_produit_ht"> </label>
+                    - Remise :
+                    <label id="lbl_produit_remise"> </label>
+                    - A payer :
+                    <label id="lbl_produit_apayer"> </label>
+                </div>
+                <table id="table_produit">
+                    <thead>
+                        <tr>
+                            <th>code</th>
+                            <th>libellé</th>
+                            <th>type</th>
+                            <th>conditionnement</th>
+                            <th>PU</th>
+                            <th>quantité</th>
+                            <th>montant</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+
+                <div class="divaction">
+                    <input id="btn_produit_ajouter" type="button" value="Ajouter">
+                </div>
+            </div>
+
+            <div id="div_facture_produit_edit">
+                <div class="divtitre">
+                    Choisir un produit dans la liste
+                </div>
+                <div class="produit_rubrique">
+                    <div>
+                        <select id="select_produit" size="6"></select>
+                        <div>
+                            <label id="lbl_erreur_select_produit" class="labelerreur"></label>
+                        </div>
+                    </div>
+                    <div>
+                        <label id="lbl_facture_detail_produit" class="facture_commentaire"></label>
+                    </div>
+                    <div>
+                        <label for="edt_produit_qte">quantité</label>
+                        <span><input id="edt_produit_qte" size="5" type="text"></span>
+                        <div>
+                            <label id="lbl_erreur_qte" class="labelerreur"></label>
+                        </div>
+                        <div>
+                            <input id="btn_produit_valider" type="button">
+                            <input id="btn_produit_annuler" type="button">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="divaction">
+            <input id="btn_facture_retour" class="btnretour" value="Retour" type="button">
+            <input id="btn_facture_valider" value="Valider" type="button">
+            <input id="btn_facture_annuler" class="btnannuler" value="Annuler" type="button">
+        </div>
+    </div>
+</body>
+<script type="module" src="../controleur/facture_edit.js"></script>
+
+
+</html>
