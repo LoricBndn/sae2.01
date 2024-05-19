@@ -33,7 +33,7 @@ class VueFactureListe {
             balisea.onclick = function (): void { vueFactureListe.detailFactureClick(uneFacture.numFact); }
             tr.insertCell().appendChild(balisea) // création nlle cellule dans ligne
             tr.insertCell().textContent = uneFacture.numFact;
-            tr.insertCell().textContent = this.convertDateToFrench(uneFacture.dateFact);
+            tr.insertCell().textContent = lesFactures.convertDateToFrench(uneFacture.dateFact);
             tr.insertCell().textContent = uneFacture.idCli;
             tr.insertCell().textContent = lesClients.byIdClient(uneFacture.idCli).nomCli;
             tr.insertCell().textContent = lesClients.byIdClient(uneFacture.idCli).communeCli;
@@ -73,11 +73,6 @@ class VueFactureListe {
     ajouterFactureClick(): void {
         // redirection vers « facture_edit.html »avec indication du statut « ajout »
         location.href = "facture_edit.html?ajout"
-    }
-
-    convertDateToFrench(dateStr: string): string {
-        const [year, month, day] = dateStr.split('-');
-        return `${day}/${month}/${year}`;
     }
 }
 

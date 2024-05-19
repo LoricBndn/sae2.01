@@ -9,24 +9,40 @@ import { UnClient, LesClients } from "../modele/data_client.js"
 type TStatutValeur = 'correct' | 'vide' | 'inconnu' | 'doublon'
 type TErreur = { statut: TStatutValeur, msg: { [key in TStatutValeur]: string } }
 type TFactureEditForm = {
-    divDetail: HTMLElement, divTitre: HTMLElement
-    , edtNum: HTMLInputElement, edtDate: HTMLInputElement
-    , edtCommentaire: HTMLInputElement, edtCodeClient: HTMLInputElement
+    divDetail: HTMLElement
+    , divTitre: HTMLElement
+    , edtNum: HTMLInputElement
+    , edtDate: HTMLInputElement
+    , edtCommentaire: HTMLInputElement
+    , edtCodeClient: HTMLInputElement
     , listeLiv: HTMLSelectElement
     , edtRemise: HTMLInputElement
-    , btnRetour: HTMLInputElement, btnValider: HTMLInputElement, btnAnnuler: HTMLInputElement
-    , lblDetailClient: HTMLLabelElement, lblDetailLiv: HTMLLabelElement, lblDetailProduit: HTMLLabelElement
-    , lblNumErreur: HTMLLabelElement, lblDateErreur: HTMLLabelElement
-    , lblCodeClientErreur: HTMLLabelElement, lblSelectLivErreur: HTMLLabelElement
-    , lblRemiseErreur: HTMLLabelElement, lblProduitErreur: HTMLLabelElement
-    , divFactureProduit: HTMLDivElement, divFactureProduitEdit: HTMLDivElement
+    , btnRetour: HTMLInputElement
+    , btnValider: HTMLInputElement
+    , btnAnnuler: HTMLInputElement
+    , lblDetailClient: HTMLLabelElement
+    , lblDetailLiv: HTMLLabelElement
+    , lblDetailProduit: HTMLLabelElement
+    , lblNumErreur: HTMLLabelElement
+    , lblDateErreur: HTMLLabelElement
+    , lblCodeClientErreur: HTMLLabelElement
+    , lblSelectLivErreur: HTMLLabelElement
+    , lblRemiseErreur: HTMLLabelElement
+    , lblProduitErreur: HTMLLabelElement
+    , divFactureProduit: HTMLDivElement
+    , divFactureProduitEdit: HTMLDivElement
     , btnAjouterProduit: HTMLInputElement
-    , lblHt: HTMLLabelElement, lblRemise: HTMLLabelElement
-    , lblApayer: HTMLLabelElement, tableProduit: HTMLTableElement
-    , listeProduit: HTMLSelectElement, edtQte: HTMLInputElement
-    , btnValiderProduit: HTMLInputElement, btnAnnulerProduit: HTMLInputElement
-    , lblSelectProduitErreur: HTMLLabelElement, lblQteErreur: HTMLLabelElement
-}
+    , lblHt: HTMLLabelElement
+    , lblRemise: HTMLLabelElement
+    , lblApayer: HTMLLabelElement
+    , tableProduit: HTMLTableElement
+    , listeProduit: HTMLSelectElement
+    , edtQte: HTMLInputElement
+    , btnValiderProduit: HTMLInputElement
+    , btnAnnulerProduit: HTMLInputElement
+    , lblSelectProduitErreur: HTMLLabelElement
+    , lblQteErreur: HTMLLabelElement
+};
 
 class VueFactureEdit {
     private _form: TFactureEditForm
@@ -38,11 +54,14 @@ class VueFactureEdit {
         // tableau contenant les messages d'erreur pour chaque type d'erreur pour chaque zone de saisie à vérifier
         [key: string]: TErreur
     }
+    private _detailProduitSelect: string;
 
     get form(): TFactureEditForm { return this._form }
     get params(): string[] { return this._params }
     get grille(): TTypProduitsByFacture { return this._grille }
     get erreur(): { [key: string]: TErreur } { return this._erreur }
+    get detailProduitSelect():string { return this._detailProduitSelect}
+    set detailProduitSelect(detail_produit_select: string) {this._detailProduitSelect = detail_produit_select}
 
     initMsgErreur(): void {
         // les erreurs "champ vide", "valeur inconnue", "doublon"
@@ -51,16 +70,7 @@ class VueFactureEdit {
         //création des 3 messages d'erreur + message pour correct
         // avec chaîne vide si pas d'erreur générée pour un type d'erreur potentielle
         this._erreur = {
-            edtNum: {
-                statut: 'vide'
-                , msg: {
-                    correct: ""
-                    , vide: "Le numéro de facture doit être renseigné."
-                    , inconnu: "Le numéro ne peut contenir que des lettres et des chiffres."
-                    , doublon: "Le numéro de facture est déjà attribué."
-                }
-            }
-            , edtDate: {
+            edtDate: {
                 statut: 'vide'
                 , msg: {
                     correct: ""
@@ -91,8 +101,8 @@ class VueFactureEdit {
                 statut: 'vide'
                 , msg: {
                     correct: ""
-                    , vide: "La remise doit être un nombre entier supérieur à 0"
-                    , inconnu: ""
+                    , vide: "La remise doit être renseignée"
+                    , inconnu: "La remise doit être un nombre entier supérieur à 0 et doit être inférieure ou égale au Taux de remise maximun accordé au client"
                     , doublon: ""
                 }
             }
@@ -141,18 +151,60 @@ class VueFactureEdit {
             default: titre = "Détail d'une facture";
         }
         this.form.divTitre.textContent = titre;
+        this.form.listeLiv.innerHTML = "";
         const lesFactures = new LesFactures;
-        const lesTypProduits = new LesTypProduits
+        const lesForfaits = new LesForfaits;
         const affi = this.params[0] === 'affi';
-        if (this.params[0] !== 'ajout') { // affi ou modif ou suppr
+        this.detailProduitSelect
+        if (this.params[0] === 'ajout') {
+            let listeFactures = lesFactures.all();
+            let listeLivraison = lesForfaits.all();
+            let i = 0;
+            let k: string;
+            const numNouvelleFact = lesFactures.numDerniereFacture(listeFactures)+1;
+            const dateDuJour = lesFactures.dateDuJour();
+            const remiseParDefaut = 0;
+
+            this.form.edtNum.value = numNouvelleFact.toFixed(0);
+            this.form.edtDate.value = lesFactures.convertDateToFrench(dateDuJour);
+            for (let j in listeLivraison) {
+                if (i === 0) {
+                k = j;
+                }
+                const forfait = listeLivraison[j];
+                const option = document.createElement("option");
+                option.value = forfait.idForfait;
+                option.text = forfait.libForfait;
+                this.form.listeLiv.appendChild(option);
+                i = 1;
+            }
+            this.form.listeLiv.value = listeLivraison[k].idForfait;
+            this.form.edtRemise.value = remiseParDefaut.toFixed(0);
+            this.form.edtNum.readOnly = true;
+            this.form.edtDate.readOnly = affi;
+            this.form.edtCommentaire.readOnly = affi;
+            this.form.edtCodeClient.readOnly = affi;
+            this.form.listeLiv.disabled = affi;
+            this.form.edtRemise.readOnly = affi;
+            this.detailForfait(vueFactureEdit.form.listeLiv.value);
+        } else {
+             // affi ou modif ou suppr
             const facture = lesFactures.byNumFacture(this._params[1]);
-            const produit = lesTypProduits.byCodeProd(this._params[2])
+            const forfait = lesForfaits.byIdForfait(facture.idForfait)
+            let listeLivraison = lesForfaits.all();
             this.form.edtNum.value = facture.numFact;
             this.form.edtDate.value = facture.dateFact;
             this.form.edtCommentaire.value = facture.commentFact;
             this.form.edtCodeClient.value = facture.idCli;
-            this.form.listeLiv.value = facture.idForfait
-            this.form.edtRemise.value = facture.tauxRemiseFact
+            for (const j in listeLivraison) {
+                const forfait = listeLivraison[j];
+                const option = document.createElement("option");
+                option.value = forfait.idForfait;
+                option.text = forfait.libForfait;
+                this.form.listeLiv.appendChild(option);
+            }
+            this.form.listeLiv.value = forfait.idForfait;
+            this.form.edtRemise.value = facture.tauxRemiseFact;
 
             this.form.edtNum.readOnly = true;
             this.form.edtDate.readOnly = affi;
@@ -160,10 +212,9 @@ class VueFactureEdit {
             this.form.edtCodeClient.readOnly = affi;
             this.form.listeLiv.disabled = affi;
             this.form.edtRemise.readOnly = affi
-            this.erreur.edtNum.statut = "correct";
-            this.detailForfait(facture.idForfait);
-            this.detailClient(facture.idCli)
-            this.detailProduit(produit.libProd)
+            this.detailClient(facture.idCli);
+            this.detailForfait(vueFactureEdit.form.listeLiv.value);
+            
         }
         this.affiProduit();
         if (this.params[0] === 'suppr') {
@@ -181,6 +232,14 @@ class VueFactureEdit {
         this.form.listeLiv.onchange = function (): void {
             vueFactureEdit.detailForfait(vueFactureEdit.form.listeLiv.value);
         }
+        this.form.listeProduit.addEventListener('mouseover', (event) => {
+            const target = event.target as HTMLOptionElement;
+            const codeProd = target.value;
+            vueFactureEdit.detailProduit(String(codeProd));
+        });
+        this.form.listeProduit.addEventListener('mouseout', () => {
+            vueFactureEdit.form.lblDetailProduit.textContent = this.detailProduitSelect;
+        });
         this.form.listeProduit.onchange = function (): void {
             vueFactureEdit.detailProduit(vueFactureEdit.form.listeProduit.value);
         }
@@ -268,8 +327,6 @@ class VueFactureEdit {
     affiGrilleProduit(): void {
         while (this.form.tableProduit.rows.length > 1) { this.form.tableProduit.rows[1].remove(); }
         let ht = 0;
-        let remise = 0;
-        let apayer = 0;
         for (let id in this._grille) {
             const unTypProduitByFacture: UnTypProduitByFacture = this.grille[id];
             const tr = this.form.tableProduit.insertRow();
@@ -295,12 +352,8 @@ class VueFactureEdit {
                 tr.insertCell().appendChild(balisea)
             }
             ht += Number(unTypProduitByFacture.unTypProduit.tarifHt) * unTypProduitByFacture.qteProd;
-            remise += ht / 10;
-            apayer = ht - remise;
         }
-        this.form.lblHt.textContent = ht.toString();
-        this.form.lblRemise.textContent = remise.toString();
-        this.form.lblApayer.textContent = apayer.toString();
+        this.form.lblHt.textContent = ht.toFixed(2);
     }
 
     supprimer(numFact: string): void {
@@ -346,9 +399,9 @@ class VueFactureEdit {
         err.statut = "correct";
         const chaine: string = valeur.trim();
         if (chaine.length > 0) {
-            if (!chaine.match(/^([a-zA-Z0-9]+)$/)) {
+            if (!chaine.match(/^([0-9]+)$/)) {
                 // expression régulière qui teste si la chaîne ne contient rien d'autre
-                // que des caractères alphabétiques minuscules ou majuscules et des chiffres
+                // que des chiffres
                 this.erreur.edtNum.statut = 'inconnu';
             }
             else if ((this.params[0] === 'ajout') && (lesClients.idExiste(chaine))) {
@@ -356,24 +409,6 @@ class VueFactureEdit {
             }
         }
         else err.statut = 'vide';
-    }
-
-    verifLivraison(valeur: string): void {
-        const err = this.erreur.edtDate
-        err.statut = "correct";
-        const chaine: string = valeur.trim();
-        if (chaine.length === 0) {
-            err.statut = 'vide';
-        }
-    }
-
-    verifRemise(valeur: string): void {
-        const err = this.erreur.edtDate
-        err.statut = "correct";
-        const chaine: string = valeur.trim();
-        if (chaine.length === 0) {
-            err.statut = 'vide';
-        }
     }
 
     traiteErreur(uneErreur: TErreur, zone: HTMLElement): boolean {
@@ -393,10 +428,8 @@ class VueFactureEdit {
         this.verifNum(this._form.edtNum.value);
         this.verifDate(this._form.edtDate.value);
         this.verifCodeClient(this._form.edtCodeClient.value);
-        this.verifRemise(this._form.edtRemise.value);
         if (JSON.stringify(this.grille) === '{}') { this._erreur.produit.statut = 'vide' }
         else this._erreur.produit.statut = "correct";
-        correct = this.traiteErreur(this._erreur.edtNum, this.form.lblNumErreur) && correct;
         correct = this.traiteErreur(this._erreur.edtDate, this.form.lblDateErreur) && correct;
         correct = this.traiteErreur(this._erreur.edtCodeClient, this.form.lblCodeClientErreur) && correct;
         correct = this.traiteErreur(this._erreur.edtRemise, this.form.lblRemiseErreur) && correct;
@@ -444,13 +477,13 @@ class VueFactureEdit {
         this.form.listeProduit.length = 0;
         const lesTypProduits = new LesTypProduits;
         const data = lesTypProduits.all();
-        const idProduits = [];
+        const codeProduits = [];
         for (let i in this._grille) {
-            idProduits.push(this._grille[i].unTypProduit.codeProd);
+            codeProduits.push(this._grille[i].unTypProduit.codeProd);
         }
         for (let i in data) {
             const id = data[i].codeProd;
-            if (idProduits.indexOf(id) === -1) { // pas dans la liste des produits déjà dans la facture
+            if (codeProduits.indexOf(id) === -1) { // pas dans la liste des produits déjà dans la facture
                 this._form.listeProduit.options.add(new Option(data[i].libProd, id)); // text, value
                 
             }

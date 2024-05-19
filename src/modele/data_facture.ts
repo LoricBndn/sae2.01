@@ -121,6 +121,38 @@ class LesFactures { // définition de la classe gérant les données de la table
         sql += " WHERE num_fact = ?"; // requête de manipulation : utiliser SQLexec
         return APIsql.sqlWeb.SQLexec(sql, [facture.dateFact, facture.commentFact, facture.tauxRemiseFact, facture.idCli, facture.idForfait]);
     }
+
+    numDerniereFacture(listeFactures: TFactures): number {
+		//Renvoie le numéro de la derniÃ¨re facture
+		let numero = 0;
+		for (let i in listeFactures) {
+		  const facture = listeFactures[i];
+		  if (!facture) {
+			break; //Si la facture n'existe pas, on a atteint la fin du tableau
+		  }
+		  numero = Number(facture.numFact);
+		}
+		return numero;
+	}
+
+    dateDuJour(): string {
+		//Renvoies la date du jour au format jj/mm/aaaa
+		const dateDuJour = new Date();
+
+		const jour = dateDuJour.getDate(); // Obtiens le jour du mois (1-31)
+		const mois = dateDuJour.getMonth() + 1; // Obtiens le mois (0-11) donc on y ajoute 1
+		const annee = dateDuJour.getFullYear(); // Obtiens l'année complète (aaaa)
+
+		//Formatage de la date du jour
+		const dateFormatee = `${jour < 10 ? '0' : ''}${jour}/${mois < 10 ? '0' : ''}${mois}/${annee}`;
+
+		return dateFormatee;
+	}
+
+    convertDateToFrench(dateStr: string): string {
+        const [year, month, day] = dateStr.split('-');
+        return `${day}/${month}/${year}`;
+    }
 }
 export { connexion }
 export { UneFacture }
