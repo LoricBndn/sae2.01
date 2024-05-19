@@ -6,8 +6,11 @@ import { LesTypProduitsByFacture } from "../modele/data_produit.js"
 
 // déclaration de l’ensemble des zones de saisie et d’affichage nécessaires à la gestion du formulaire type
 type TFactureListeForm = {
-    divTitre: HTMLElement, btnAjouter: HTMLInputElement, tableFacture: HTMLTableElement
-}
+    divTitre: HTMLElement, 
+    btnAjouter: HTMLInputElement, 
+    tableFacture: HTMLTableElement
+};
+
 class VueFactureListe {
     private _form: TFactureListeForm;
     get form(): TFactureListeForm { return this._form }
@@ -34,8 +37,8 @@ class VueFactureListe {
             tr.insertCell().textContent = uneFacture.idCli;
             tr.insertCell().textContent = lesClients.byIdClient(uneFacture.idCli).nomCli;
             tr.insertCell().textContent = lesClients.byIdClient(uneFacture.idCli).communeCli;
-            tr.insertCell().textContent = lesTypProduitsByFacture.getTotalMontantSansRemise(lesTypProduitsByFacture.byNumFact(num)).toFixed(0) + " €";
-            tr.insertCell().textContent = lesTypProduitsByFacture.getTotalMontantAvecRemise(lesTypProduitsByFacture.byNumFact(num), uneFacture).toFixed(0) + " €";
+            tr.insertCell().textContent = lesTypProduitsByFacture.getTotalMontantSansRemise(lesTypProduitsByFacture.byNumFact(num)).toFixed(2) + " €";
+            tr.insertCell().textContent = lesTypProduitsByFacture.getTotalMontantAvecRemise(lesTypProduitsByFacture.byNumFact(num), uneFacture).toFixed(2) + " €";
             tr.insertCell().textContent = lesForfaits.byIdForfait(uneFacture.idForfait).mtForfait + " €";
             // création balise <a> pour appel page modification du détail de la facture
             balisea = document.createElement("a")
