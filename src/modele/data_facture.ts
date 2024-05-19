@@ -6,7 +6,6 @@ class UneFacture {
     private _tauxRemiseFact: string;
     private _idCli: string;
     private _idForfait: string;
-    
 
     constructor(num_fact = "", date_fact = "", comment_fact = "", taux_remise_fact = "", id_cli = "", id_forfait = "") {
         this._numFact = num_fact;
@@ -14,8 +13,7 @@ class UneFacture {
         this._commentFact = comment_fact;
         this._tauxRemiseFact = taux_remise_fact;
         this._idCli = id_cli;
-        this._idForfait = id_forfait;
-        
+        this._idForfait = id_forfait;    
     }
 
     // définition des « getters » et des « setters » pour les attributs privés de la classe
@@ -36,9 +34,12 @@ class UneFacture {
         // renvoie l’objet sous la forme d’un tableau associatif
         // pour un affichage dans une ligne d’un tableau HTML
         const tableau: APIsql.TtabAsso = {
-            'numFact': this._numFact, 'dateFact': this._dateFact
-            , 'commentFact': this._commentFact, 'tauxRemiseFact': this._tauxRemiseFact
-            , 'idCli': this._idCli, 'idForfait': this._idForfait
+            numFact: this._numFact, 
+            dateFact: this._dateFact, 
+            commentFact: this._commentFact, 
+            tauxRemiseFact: this._tauxRemiseFact, 
+            idCli: this._idCli, 
+            idForfait: this._idForfait
         };
         return tableau;
     }
@@ -84,8 +85,7 @@ class LesFactures { // définition de la classe gérant les données de la table
 
     byNumFacture(num_fact: string): UneFacture { // renvoie l’objet correspondant à la facture num_fact
         let facture = new UneFacture;
-        const factures: TFactures = this.load(APIsql.sqlWeb.SQLloadData(this.prepare("num_fact = ?")
-            , [num_fact]));
+        const factures: TFactures = this.load(APIsql.sqlWeb.SQLloadData(this.prepare("num_fact = ?"), [num_fact]));
         const lesCles: string[] = Object.keys(factures);
         // affecte les clés du tableau associatif « factures » dans le tableau de chaines « lesCles »
         if (lesCles.length > 0) {
@@ -111,7 +111,7 @@ class LesFactures { // définition de la classe gérant les données de la table
 
     insert(facture: UneFacture): boolean { // requête d’ajout d’une facture dans la table
         let sql: string; // requête de manipulation : utiliser SQLexec
-        sql = "INSERT INTO facture(num_fact, date_fact, comment_fact, taux_remise_fact, id_cli, id_forfait) VALUES (?, ?, ?, ?, ?)";
+        sql = "INSERT INTO facture(num_fact, date_fact, comment_fact, taux_remise_fact, id_cli, id_forfait) VALUES (?, ?, ?, ?, ?, ?)";
         return APIsql.sqlWeb.SQLexec(sql, [facture.numFact, facture.commentFact, facture.dateFact, facture.tauxRemiseFact, facture.idCli, facture.idForfait]);
     }
     
