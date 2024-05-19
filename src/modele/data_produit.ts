@@ -46,6 +46,12 @@ class UnTypProduit {
         };
         return tableau;
     }
+
+    getMontantProduit(produit: UnTypProduitByFacture): number {
+		// renvoie le montant Ã  payer pour un produit par rapport Ã  son tarif HT et sa qte
+		const montantProduit = produit.qteProd * Number(produit.unTypProduit.tarifHt);
+		return montantProduit;
+	}
 }
 
 type TTypProduits = { [key: string]: UnTypProduit }; // tableau d’objets UnTypProduit
@@ -61,7 +67,7 @@ class LesTypProduits { // définition de la classe gérant les données de la ta
         for (let i = 0; i < result.length; i++) {
             const item: APIsql.TtabAsso = result[i];
             const typProduit = new UnTypProduit(item['code_prod'], item['lib_prod'], item['type'], item['origine'], item['conditionnement'], item['tarif_ht']);
-            typProduits[typProduit.codeProd] = typProduit;// clé d’un élément du tableau : id equipt
+            typProduits[typProduit.codeProd] = typProduit;// clé d’un élément du tableau : code prod
         }
         return typProduits;
     }
@@ -123,7 +129,7 @@ class UnTypProduitByFacture {
         // renvoie l’objet sous la forme d’un tableau associatif
         // pour un affichage dans une ligne d’un tableau HTML
         let tableau = this.unTypProduit.toArray(); // appel de la méthode « toArray » de « UnTypProduit »
-        tableau['qte_prod'] = this.qteProd.toFixed(0);
+        tableau['qteProd'] = this.qteProd.toFixed(0);
         return tableau;
     }
 }
@@ -159,12 +165,12 @@ class LesTypProduitsByFacture {
     }
 
     byNumFact(num_fact: string): TTypProduitsByFacture {
-        // renvoie le tableau d’objets contenant tous les produits de la facture num fact
+        // renvoie le tableau d’objets contenant tous les produits de la facture num_fact
         return this.load(APIsql.sqlWeb.SQLloadData(this.prepare("num_fact = ?"), [num_fact]));
     }
 
     byNumFactureCodeProd(num_fact: string, code_prod: string): UnTypProduitByFacture {
-        // renvoie l’objet de l’équipement code_prod contenu dans la salle num_fact
+        // renvoie l’objet du oroduit code_prod contenu dans la facture num_fact
         let typProduitByFacture = new UnTypProduitByFacture;
         let typProduitsByFacture: TTypProduitsByFacture = this.load(APIsql.sqlWeb.SQLloadData
             (this.prepare("num_fact = ? and code_prod = ?"), [num_fact, code_prod]));
@@ -183,42 +189,26 @@ class LesTypProduitsByFacture {
         return T;
     }
     
-    getMontantProduit(produit: UnTypProduitByFacture): number {
-		// renvoie le montant Ã  payer pour un produit par rapport Ã  son tarif HT et sa qte
-		const montantProduit = produit.qteProd * Number(produit.unTypProduit.tarifHt);
-		return montantProduit;
-	}
-
     getTotalMontantSansRemise(typProduits: TTypProduitsByFacture): number { 
         // renvoie le montant total d'une facture sans remise
         let totalHt = 0;
         for (let id in typProduits) {
-            const produit = typProduits[id];
-            totalHt += Number(produit.unTypProduit.tarifHt) * produit.qteProd;
+            totalHt += typProduits[id].unTypProduit.getMontantProduit(typProduits[id])
         }
         return totalHt;
     }
 
-    getTotalMontantAvecRemise(typProduits: TTypProduitsByFacture, uneFacture: UneFacture): number { 
-        // renvoie le montant total d’une facture avec remise
-        const totalHt = this.getTotalMontantSansRemise(typProduits);
-        // Calcul du montant total de la remise sur la facture
-        const totalRemise = this.getTotalMontantRemise(typProduits, uneFacture);
-        const totalAPayer = totalHt - totalRemise;
-        return totalAPayer;
-        
-    }
-
     getTotalMontantRemise(typProduits: TTypProduitsByFacture, uneFacture: UneFacture): number { 
         // renvoie le montant total de la remise sur la facture
-        let totalRemise = 0;
-        for (let id in typProduits) {
-            // Calcul de la remise pour ce produit
-            const remise = Number(typProduits[id].unTypProduit.tarifHt) * typProduits[id].qteProd * (Number(uneFacture.tauxRemiseFact) / 100);
-            // Ajout de la remise au total
-            totalRemise += remise;
-        }
+        const totalRemise = this.getTotalMontantSansRemise(typProduits) * (Number(uneFacture.tauxRemiseFact) / 100);
         return totalRemise;
+    }
+
+    getTotalMontantAvecRemise(typProduits: TTypProduitsByFacture, uneFacture: UneFacture): number { 
+        // renvoie le montant total d’une facture avec remise
+        const totalAPayer = this.getTotalMontantSansRemise(typProduits) - this.getTotalMontantRemise(typProduits, uneFacture);
+        return totalAPayer;
+        
     }
 
     delete(num_fact: string): boolean { // requête de suppression des produits d’une facture dans «ligne»
