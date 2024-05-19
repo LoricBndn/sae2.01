@@ -21,8 +21,11 @@ class UnForfait { // définition de la classe gérant les données d’un forfai
 
     toArray():APIsql.TtabAsso { // renvoie l’objet sous la forme d’un tableau associatif
         // pour un affichage dans une ligne d’un tableau HTML
-        let tableau : APIsql.TtabAsso = {'idForfait':this.idForfait, 'libForfait':this.libForfait,
-        'mtForfait':this.mtForfait };
+        let tableau : APIsql.TtabAsso = {
+            idForfait:this.idForfait, 
+            libForfait:this.libForfait,
+            mtForfait:this.mtForfait 
+        };
         return tableau;
     }
 }
