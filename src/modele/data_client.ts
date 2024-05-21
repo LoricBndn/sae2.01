@@ -105,7 +105,7 @@ class LesClients { // définition de la classe gérant les données de la table 
         return this.load(APIsql.sqlWeb.SQLloadData(this.prepare(""),[]));
     }
 
-    byIdClient(id_cli : string) : UnClient { // renvoie l’objet correspondant au département id_cli
+    byIdCli(id_cli : string) : UnClient { // renvoie l’objet correspondant au département id_cli
         let client = new UnClient;
         const clients : TClients =
                         this.load(APIsql.sqlWeb.SQLloadData(this.prepare("id_cli = ?"),[id_cli]));
