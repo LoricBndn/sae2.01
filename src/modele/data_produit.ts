@@ -47,9 +47,9 @@ class UnTypProduit {
         return tableau;
     }
 
-    getMontantProduit(produit: UnTypProduitByFacture): number {
-		// renvoie le montant Ã  payer pour un produit par rapport Ã  son tarif HT et sa qte
-		const montantProduit = produit.qteProd * Number(produit.unTypProduit.tarifHt);
+    getMontantProduit(typProduitByFacture: UnTypProduitByFacture): number {
+		// renvoie le montant à payer pour un produit par rapport à son prix unitaire et sa qte
+		const montantProduit = typProduitByFacture.qteProd * Number(typProduitByFacture.unTypProduit.tarifHt);
 		return montantProduit;
 	}
 }
