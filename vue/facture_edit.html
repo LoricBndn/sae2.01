@@ -18,13 +18,14 @@
             </div>
             <div>
                 <label for="edt_facture_num">Numéro</label>
-                <span><input id="edt_facture_num" placeholder="n° facture" maxlength="5" size="5" type="text"></span>
+                <span><input id="edt_facture_num" placeholder="n° facture" size="5" type="text"></span>
                 <span><label id="lbl_erreur_date" class="labelerreur"></label></span>
             </div>
             <div>
                 <label for="edt_facture_date">le</label>
                 <span><input id="edt_facture_date" size="10" type="date"></span>
-                <span> <textarea id="edt_commentaire" rows="3"></textarea></span>
+                <span><textarea id="edt_facture_commentaire" placeholder="Commentaire non obligatoire" cols="140"
+                    rows="4"></textarea></span>
             </div>
         </div>
         <div class="facture_rubrique">
@@ -104,12 +105,10 @@
                 <div class="produit_rubrique">
                     <div>
                         <select id="select_produit" size="6"></select>
+                        <label id="lbl_facture_detail_produit" class="facture_commentaire"></label>
                         <div>
                             <label id="lbl_erreur_select_produit" class="labelerreur"></label>
                         </div>
-                    </div>
-                    <div>
-                        <label id="lbl_facture_detail_produit" class="facture_commentaire"></label>
                     </div>
                     <div>
                         <label for="edt_produit_qte">quantité</label>
