@@ -43,6 +43,11 @@ class UneFacture {
         };
         return tableau;
     }
+
+    convertDateToFrench(dateStr: string): string {
+        const [year, month, day] = dateStr.split('-');
+        return `${day}/${month}/${year}`;
+    }
 }
 
 type TFactures = { [key: string]: UneFacture }; // tableau d’objets UneFacture
@@ -83,7 +88,7 @@ class LesFactures { // définition de la classe gérant les données de la table
         return this.load(APIsql.sqlWeb.SQLloadData(this.prepare(""), []));
     }
 
-    byNumFacture(num_fact: string): UneFacture { // renvoie l’objet correspondant à la facture num_fact
+    byNumFact(num_fact: string): UneFacture { // renvoie l’objet correspondant à la facture num_fact
         let facture = new UneFacture;
         const factures: TFactures = this.load(APIsql.sqlWeb.SQLloadData(this.prepare("num_fact = ?"), [num_fact]));
         const lesCles: string[] = Object.keys(factures);
@@ -112,7 +117,7 @@ class LesFactures { // définition de la classe gérant les données de la table
     insert(facture: UneFacture): boolean { // requête d’ajout d’une facture dans la table
         let sql: string; // requête de manipulation : utiliser SQLexec
         sql = "INSERT INTO facture(num_fact, date_fact, comment_fact, taux_remise_fact, id_cli, id_forfait) VALUES (?, ?, ?, ?, ?, ?)";
-        return APIsql.sqlWeb.SQLexec(sql, [facture.numFact, facture.commentFact, facture.dateFact, facture.tauxRemiseFact, facture.idCli, facture.idForfait]);
+        return APIsql.sqlWeb.SQLexec(sql, [facture.numFact, facture.dateFact, facture.commentFact, facture.tauxRemiseFact, facture.idCli, facture.idForfait]);
     }
     
     update(facture: UneFacture): boolean { // requête de modification d’une facture dans la table
@@ -123,7 +128,7 @@ class LesFactures { // définition de la classe gérant les données de la table
     }
 
     numDerniereFacture(listeFactures: TFactures): number {
-		//Renvoie le numéro de la derniÃ¨re facture
+		// renvoie le numéro de la dernière facture
 		let numero = 0;
 		for (let i in listeFactures) {
 		  const facture = listeFactures[i];
@@ -136,23 +141,18 @@ class LesFactures { // définition de la classe gérant les données de la table
 	}
 
     dateDuJour(): string {
-		//Renvoies la date du jour au format jj/mm/aaaa
+		// renvoie la date du jour au format jj/mm/aaaa
 		const dateDuJour = new Date();
 
 		const jour = dateDuJour.getDate(); // Obtiens le jour du mois (1-31)
 		const mois = dateDuJour.getMonth() + 1; // Obtiens le mois (0-11) donc on y ajoute 1
 		const annee = dateDuJour.getFullYear(); // Obtiens l'année complète (aaaa)
 
-		//Formatage de la date du jour
+		// Formatage de la date du jour
 		const dateFormatee = `${jour < 10 ? '0' : ''}${jour}/${mois < 10 ? '0' : ''}${mois}/${annee}`;
 
 		return dateFormatee;
 	}
-
-    convertDateToFrench(dateStr: string): string {
-        const [year, month, day] = dateStr.split('-');
-        return `${day}/${month}/${year}`;
-    }
 }
 export { connexion }
 export { UneFacture }
