@@ -8,7 +8,7 @@ class Connexion {
 	}
 	init():void {
 		// à adapter avec voter nom de base et vos identifiants de connexion
-		APIsql.sqlWeb.bdOpen('devbdd.iutmetz.univ-lorraine.fr','3306','bondon3u_sae202', 'bondon3u_appli','Loric#2302!', 'utf8');
+		APIsql.sqlWeb.bdOpen('devbdd.iutmetz.univ-lorraine.fr','3306','bondon3u_sae201', 'bondon3u_appli','Loric#2302!', 'utf8');
 	}
 }
 let connexion = new Connexion;
