@@ -23,10 +23,8 @@ type TFactureEditForm = {
     , lblDetailClient: HTMLLabelElement
     , lblDetailLiv: HTMLLabelElement
     , lblDetailProduit: HTMLLabelElement
-    , lblNumErreur: HTMLLabelElement
     , lblDateErreur: HTMLLabelElement
     , lblCodeClientErreur: HTMLLabelElement
-    , lblSelectLivErreur: HTMLLabelElement
     , lblRemiseErreur: HTMLLabelElement
     , lblProduitErreur: HTMLLabelElement
     , divFactureProduit: HTMLDivElement
@@ -54,14 +52,14 @@ class VueFactureEdit {
         // tableau contenant les messages d'erreur pour chaque type d'erreur pour chaque zone de saisie à vérifier
         [key: string]: TErreur
     }
-    private _detailProduitSelect: string;
+    private _detailProduitSelect: string
 
     get form(): TFactureEditForm { return this._form }
     get params(): string[] { return this._params }
     get grille(): TTypProduitsByFacture { return this._grille }
     get erreur(): { [key: string]: TErreur } { return this._erreur }
-    get detailProduitSelect():string { return this._detailProduitSelect}
-    set detailProduitSelect(detail_produit_select: string) {this._detailProduitSelect = detail_produit_select}
+    get detailProduitSelect(): string { return this._detailProduitSelect }
+    set detailProduitSelect(detail_produit_select: string) { this._detailProduitSelect = detail_produit_select }
 
     initMsgErreur(): void {
         // les erreurs "champ vide", "valeur inconnue", "doublon"
@@ -71,29 +69,20 @@ class VueFactureEdit {
         // avec chaîne vide si pas d'erreur générée pour un type d'erreur potentielle
         this._erreur = {
             edtDate: {
-                statut: 'vide'
-                , msg: {
-                    correct: ""
-                    , vide: "La date doit être renseigné."
-                    , inconnu: ""
-                    , doublon: ""
-                }
+                statut: "vide",
+                msg: {
+                  correct: "",
+                  vide: "La date doit être renseignée.",
+                  inconnu: "La date ne doit pas être postérieure à la date du jour.",
+                  doublon: "",
+                },
             }
             , edtCodeClient: {
                 statut: 'vide'
                 , msg: {
                     correct: ""
-                    , vide: "Le client doit être renseigné."
-                    , inconnu: "Client inconnu."
-                    , doublon: ""
-                }
-            }
-            , listeLiv: {
-                statut: 'vide'
-                , msg: {
-                    correct: ""
-                    , vide: "Aucune livraison choisie"
-                    , inconnu: ""
+                    , vide: "Le numéro de client doit être renseigné."
+                    , inconnu: "Numéro de client inconnu."
                     , doublon: ""
                 }
             }
@@ -101,8 +90,8 @@ class VueFactureEdit {
                 statut: 'vide'
                 , msg: {
                     correct: ""
-                    , vide: "La remise doit être renseignée"
-                    , inconnu: "La remise doit être un nombre entier supérieur à 0 et doit être inférieure ou égale au Taux de remise maximun accordé au client"
+                    , vide: "La remise doit être un nombre entier supérieur ou égal à 0"
+                    , inconnu: "Le taux doit être compris entre 0 et le taux maximum accordé au client"
                     , doublon: ""
                 }
             }
@@ -145,18 +134,18 @@ class VueFactureEdit {
         this.initMsgErreur();
         let titre: string;
         switch (this.params[0]) {
-            case 'suppr': titre = "Suppression d'une facture"; break;
-            case 'ajout': titre = "Nouvelle facture"; break;
-            case 'modif': titre = "Modification d'une facture"; break;
+            case "suppr": titre = "Suppression d'une facture"; break;
+            case "ajout": titre = "Nouvelle facture"; break;
+            case "modif": titre = "Modification d'une facture"; break;
             default: titre = "Détail d'une facture";
         }
         this.form.divTitre.textContent = titre;
         this.form.listeLiv.innerHTML = "";
-        const lesFactures = new LesFactures;
-        const lesForfaits = new LesForfaits;
-        const affi = this.params[0] === 'affi';
-        this.detailProduitSelect
-        if (this.params[0] === 'ajout') {
+        const lesFactures = new LesFactures();
+        const lesForfaits = new LesForfaits();
+        const affi = this.params[0] === "affi";
+        this._detailProduitSelect = ""
+        if (this.params[0] === "ajout") { 
             let listeFactures = lesFactures.all();
             let listeLivraison = lesForfaits.all();
             let i = 0;
@@ -166,7 +155,7 @@ class VueFactureEdit {
             const remiseParDefaut = 0;
 
             this.form.edtNum.value = numNouvelleFact.toFixed(0);
-            this.form.edtDate.value = lesFactures.convertDateToFrench(dateDuJour);
+            this.form.edtDate.value = lesFactures.convertDateToEnglish(dateDuJour);
             for (let j in listeLivraison) {
                 if (i === 0) {
                 k = j;
@@ -188,9 +177,9 @@ class VueFactureEdit {
             this.form.edtRemise.readOnly = affi;
             this.detailForfait(vueFactureEdit.form.listeLiv.value);
         } else {
-             // affi ou modif ou suppr
-            const facture = lesFactures.byNumFacture(this._params[1]);
-            const forfait = lesForfaits.byIdForfait(facture.idForfait)
+            // affi ou modif ou suppr
+            const facture = lesFactures.byNumFact(this._params[1]);
+            const forfait = lesForfaits.byIdForfait(facture.idForfait);
             let listeLivraison = lesForfaits.all();
             this.form.edtNum.value = facture.numFact;
             this.form.edtDate.value = facture.dateFact;
@@ -212,9 +201,8 @@ class VueFactureEdit {
             this.form.edtCodeClient.readOnly = affi;
             this.form.listeLiv.disabled = affi;
             this.form.edtRemise.readOnly = affi
-            this.detailClient(facture.idCli);
+            this.detailClient(String(facture.idCli));
             this.detailForfait(vueFactureEdit.form.listeLiv.value);
-            
         }
         this.affiProduit();
         if (this.params[0] === 'suppr') {
@@ -227,21 +215,24 @@ class VueFactureEdit {
         this.form.btnAjouterProduit.hidden = affi;
         // définition des événements
         this.form.edtCodeClient.onchange = function (): void {
-            vueFactureEdit.detailClient(vueFactureEdit.form.edtCodeClient.value);
+            vueFactureEdit.detailClient(String(vueFactureEdit.form.edtCodeClient.value));
         }
         this.form.listeLiv.onchange = function (): void {
-            vueFactureEdit.detailForfait(vueFactureEdit.form.listeLiv.value);
+            vueFactureEdit.detailForfait(String(vueFactureEdit.form.listeLiv.value));
         }
+        this.form.edtRemise.onchange = function (): void {
+            vueFactureEdit.calculRemise(String(vueFactureEdit.form.edtRemise.value));
+        };
         this.form.listeProduit.addEventListener('mouseover', (event) => {
             const target = event.target as HTMLOptionElement;
             const codeProd = target.value;
-            vueFactureEdit.detailProduit(String(codeProd));
+            vueFactureEdit.detailProduitSurvol(String(codeProd));
         });
         this.form.listeProduit.addEventListener('mouseout', () => {
             vueFactureEdit.form.lblDetailProduit.textContent = this.detailProduitSelect;
         });
         this.form.listeProduit.onchange = function (): void {
-            vueFactureEdit.detailProduit(vueFactureEdit.form.listeProduit.value);
+            vueFactureEdit.detailProduitSelect = vueFactureEdit.detailProduitClick(String(vueFactureEdit.form.listeProduit.value));
         }
         this.form.btnRetour.onclick = function (): void { vueFactureEdit.retourClick(); }
         this.form.btnAnnuler.onclick = function (): void { vueFactureEdit.retourClick(); }
@@ -259,7 +250,7 @@ class VueFactureEdit {
         err.statut = "correct";
         const chaine: string = valeur.trim();
         if (chaine.length > 0) {
-            const client: UnClient = lesClients.byIdClient(chaine);
+            const client: UnClient = lesClients.byIdCli(chaine);
             if (client.idCli !== "") { // client trouvé
                 detail.textContent
                     = client.civCli + " " + client.nomCli + " " + client.prenomCli + "\r\n" 
@@ -276,11 +267,9 @@ class VueFactureEdit {
     }
 
     detailForfait(valeur: string): void {
-        const err = this.erreur.listeLiv
         const lesForfaits = new LesForfaits;
         const detail = this.form.lblDetailLiv;
         detail.textContent = "";
-        err.statut = "correct";
         const chaine: string = valeur.trim();
         if (chaine.length > 0) {
             const forfait: UnForfait = lesForfaits.byIdForfait(chaine);
@@ -288,34 +277,51 @@ class VueFactureEdit {
                 detail.textContent
                     = forfait.libForfait + "\r\n" + forfait.mtForfait + " €";
             }
-            else {
-                err.statut = 'inconnu';
-                detail.textContent = err.msg.inconnu;
-            }
         }
-        else err.statut = 'vide';
     }
 
-    detailProduit(valeur: string): void {
-        const err = this.erreur.listeProduit
+    calculRemise(valeur: string): void {
+        const detailRemise = this.form.lblRemise;
+        const detailAPayer = this.form.lblApayer;
+        const detailHT = this.form.lblHt;
+        detailAPayer.textContent = "";
+        detailRemise.textContent = "";
+        let prix = 0;
+        let remise = 0;
+        for (let id in this.grille) {
+            const unTypProduitByFacture: UnTypProduitByFacture = this.grille[id];
+            prix = unTypProduitByFacture.qteProd*Number(unTypProduitByFacture.unTypProduit.tarifHt);
+            remise += Number(valeur) / 100 * prix;
+        }
+        detailRemise.textContent = remise.toFixed(2);
+        detailAPayer.textContent = (Number(detailHT.textContent) - remise).toFixed(2);      
+    }
+
+    detailProduitSurvol(codeProd: string): void {
         const lesTypProduits = new LesTypProduits;
         const detail = this.form.lblDetailProduit;
-        detail.textContent = "";
-        err.statut = "correct";
-        const chaine: string = valeur.trim();
-        if (chaine.length > 0) {
-            const produit: UnTypProduit = lesTypProduits.byCodeProd(chaine);
-            if (produit.codeProd !== "") { // produit trouvé
-                detail.textContent
-                    = produit.type + "\r\n" + produit.conditionnement + "cl" + "\r\n" 
-                    + produit.origine + "\r\n" + produit.tarifHt + " €";
-            }
-            else {
-                err.statut = 'inconnu';
-                detail.textContent = err.msg.inconnu;
-            }
+        const produit: UnTypProduit = lesTypProduits.byCodeProd(codeProd);
+        if (produit.codeProd !== "") { // produit trouvé
+            detail.textContent
+                = produit.type + "\r\n" + produit.conditionnement + "cl" + "\r\n" 
+                + produit.origine + "\r\n" + produit.tarifHt + " €";
         }
-        else err.statut = 'vide';
+    }
+
+    detailProduitClick(codeProd: string): string {
+        const lesTypProduits = new LesTypProduits;
+        const detail = this.form.lblDetailProduit;
+        const produit: UnTypProduit = lesTypProduits.byCodeProd(codeProd);
+        if (produit.codeProd !== "") { // produit trouvé
+            detail.textContent
+                = produit.type + "\r\n" + produit.conditionnement + "cl" + "\r\n" 
+                + produit.origine + "\r\n" + produit.tarifHt + " €";
+            return produit.type + "\r\n" + produit.conditionnement + "cl" + "\r\n" 
+                + produit.origine + "\r\n" + produit.tarifHt + " €";
+            }
+        else {
+            return ""
+        }
     }
 
     affiProduit(): void {
@@ -354,6 +360,7 @@ class VueFactureEdit {
             ht += Number(unTypProduitByFacture.unTypProduit.tarifHt) * unTypProduitByFacture.qteProd;
         }
         this.form.lblHt.textContent = ht.toFixed(2);
+        this.calculRemise(String(vueFactureEdit.form.edtRemise.value));
     }
 
     supprimer(numFact: string): void {
@@ -366,49 +373,71 @@ class VueFactureEdit {
         this.retourClick();
     }
 
-    verifNum(valeur: string): void {
+    verifDate(date: string): void {
         const lesFactures = new LesFactures;
-        const err = this.erreur.edtNum
+        const uneFacture = new UneFacture();
+        const err = this._erreur.edtDate;
+        const labelError = this.form.lblDateErreur;
+        const chaine: string = date.trim();
         err.statut = "correct";
-        const chaine: string = valeur.trim();
-        if (chaine.length > 0) {
-            if (!chaine.match(/^([a-zA-Z0-9]+)$/)) {
-                // expression régulière qui teste si la chaîne ne contient rien d'autre
-                // que des caractères alphabétiques minuscules ou majuscules et des chiffres
-                this.erreur.edtNum.statut = 'inconnu';
-            }
-            else if ((this.params[0] === 'ajout') && (lesFactures.idExiste(chaine))) {
-                this.erreur.edtNum.statut = 'doublon';
-            }
-        }
-        else err.statut = 'vide';
-    }
-
-    verifDate(valeur: string): void {
-        const err = this.erreur.edtDate
-        err.statut = "correct";
-        const chaine: string = valeur.trim();
         if (chaine.length === 0) {
-            err.statut = 'vide';
+          err.statut = "vide";
+          labelError.textContent = err.msg.vide;
+        } else if (!uneFacture.estDateValide(chaine)) {
+          err.statut = "inconnu";
+          labelError.textContent = err.msg.inconnu;
+        } else {
+          const dateRécup = new Date(lesFactures.convertDateToEnglish(chaine));
+          const dateDuJour = new Date(lesFactures.convertDateToEnglish(lesFactures.dateDuJour()));
+          if (dateRécup > dateDuJour) {
+            err.statut = "inconnu";
+            labelError.textContent = err.msg.inconnu;
+          }
         }
     }
 
     verifCodeClient(valeur: string): void {
-        const lesClients = new LesClients;
-        const err = this.erreur.edtNum
+        const lesFactures = new LesFactures();
+        const err = this.erreur.edtCodeClient
         err.statut = "correct";
         const chaine: string = valeur.trim();
         if (chaine.length > 0) {
             if (!chaine.match(/^([0-9]+)$/)) {
                 // expression régulière qui teste si la chaîne ne contient rien d'autre
                 // que des chiffres
-                this.erreur.edtNum.statut = 'inconnu';
+                this.erreur.edtCodeClient.statut = 'inconnu';
             }
-            else if ((this.params[0] === 'ajout') && (lesClients.idExiste(chaine))) {
-                this.erreur.edtNum.statut = 'doublon';
+            else if ((this.params[0] === "ajout") && (lesFactures.idExiste(chaine))) {
+                this.erreur.edtCodeClient.statut = 'doublon';
             }
         }
         else err.statut = 'vide';
+    }
+
+    verifRemise(valeur: string, client: string): void {
+        const err = this._erreur.edtRemise;
+        const labelError = this.form.lblRemiseErreur;
+        const lesClients = new LesClients();
+        labelError.textContent = "";
+        err.statut = "correct";
+        const chaineClient = client.trim();
+        const chaine: string = valeur.trim();
+        if (chaineClient.length > 0) {
+            const leClient: UnClient = lesClients.byIdCli(chaineClient);
+            if (chaine.length > 0) {
+                if (leClient.idCli !== "") {
+                    // Client trouvé
+                    if (Number(valeur) >= 0 && Number(valeur) <= 100 && Number(valeur) <= Number(leClient.tauxmaxRemiseCli)) {
+                    } else {
+                    err.statut = "inconnu";
+                    labelError.textContent = err.msg.inconnu;
+                    }
+                }
+            } else {
+                err.statut = "vide";
+                labelError.textContent = err.msg.vide;
+            }
+        }
     }
 
     traiteErreur(uneErreur: TErreur, zone: HTMLElement): boolean {
@@ -425,25 +454,25 @@ class VueFactureEdit {
 
     validerClick(): void {
         let correct = true;
-        this.verifNum(this._form.edtNum.value);
-        this.verifDate(this._form.edtDate.value);
+        const facture = new UneFacture;
+        const lesFactures = new LesFactures;
+        this.verifDate(lesFactures.convertDateToFrench(this._form.edtDate.value));
         this.verifCodeClient(this._form.edtCodeClient.value);
+        this.verifRemise(this._form.edtRemise.value, this._form.edtCodeClient.value);
         if (JSON.stringify(this.grille) === '{}') { this._erreur.produit.statut = 'vide' }
         else this._erreur.produit.statut = "correct";
         correct = this.traiteErreur(this._erreur.edtDate, this.form.lblDateErreur) && correct;
         correct = this.traiteErreur(this._erreur.edtCodeClient, this.form.lblCodeClientErreur) && correct;
         correct = this.traiteErreur(this._erreur.edtRemise, this.form.lblRemiseErreur) && correct;
         correct = this.traiteErreur(this._erreur.produit, this.form.lblProduitErreur) && correct;
-        const lesFactures = new LesFactures;
-        const facture = new UneFacture;
         if (correct) {  
             facture.numFact = this.form.edtNum.value;
-            facture.dateFact = this.form.edtDate.value;
+            facture.dateFact = lesFactures.convertDateToFrench(this.form.edtDate.value)
             facture.commentFact = this.form.edtCommentaire.value;
             facture.idCli = this.form.edtCodeClient.value;
             facture.idForfait = this.form.listeLiv.value; 
             facture.tauxRemiseFact = this.form.edtRemise.value;
-            if (this._params[0] === 'ajout') {
+            if (this._params[0] === "ajout") {
                 lesFactures.insert(facture);
             }
             else {
@@ -463,6 +492,7 @@ class VueFactureEdit {
     // gestion des produits de la facture
     modifierProduitClick(id: string): void {
         this.afficherProduitEdit();
+        this.detailProduitClick(id);
         const lesTypProduits = new LesTypProduits();
         const UnTypProduit: UnTypProduit = lesTypProduits.byCodeProd(id);
         this.form.listeProduit.length = 0;
@@ -477,15 +507,15 @@ class VueFactureEdit {
         this.form.listeProduit.length = 0;
         const lesTypProduits = new LesTypProduits;
         const data = lesTypProduits.all();
-        const codeProduits = [];
+        const idProduits = [];
         for (let i in this._grille) {
-            codeProduits.push(this._grille[i].unTypProduit.codeProd);
+            idProduits.push(this._grille[i].unTypProduit.codeProd);
         }
         for (let i in data) {
             const id = data[i].codeProd;
-            if (codeProduits.indexOf(id) === -1) { // pas dans la liste des produits déjà dans la facture
+            if (idProduits.indexOf(id) === -1) { // pas dans la liste des produits déjà dans la facture
                 this._form.listeProduit.options.add(new Option(data[i].libProd, id)); // text, value
-                
+
             }
         }
     }

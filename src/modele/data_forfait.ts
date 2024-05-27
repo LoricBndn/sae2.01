@@ -1,4 +1,4 @@
-import {connexion, APIsql} from "../modele/connexion.js"
+import {connexion, APIsql} from "./connexion.js"
 class UnForfait { // définition de la classe gérant les données d’un forfait
     private _idForfait: string;
     private _libForfait : string;
@@ -21,11 +21,8 @@ class UnForfait { // définition de la classe gérant les données d’un forfai
 
     toArray():APIsql.TtabAsso { // renvoie l’objet sous la forme d’un tableau associatif
         // pour un affichage dans une ligne d’un tableau HTML
-        let tableau : APIsql.TtabAsso = {
-            idForfait:this.idForfait, 
-            libForfait:this.libForfait,
-            mtForfait:this.mtForfait 
-        };
+        let tableau : APIsql.TtabAsso = {'idForfait':this.idForfait, 'libForfait':this.libForfait,
+        'mtForfait':this.mtForfait };
         return tableau;
     }
 }
@@ -73,7 +70,7 @@ class LesForfaits { // définition de la classe gérant les données de la table
         }
         return forfait;
     }
-    
+
     toArray(forfaits : TForfaits) : APIsql.TdataSet {
     // renvoie le tableau d’objets sous la forme d’un tableau de tableaux associatifs
     // pour un affichage dans un tableau HTML

@@ -31,6 +31,23 @@ class UneFacture {
         };
         return tableau;
     }
+    estDateValide(dateString) {
+        const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+        const match = dateString.match(regex);
+        if (!match) {
+            return false;
+        }
+        // Extraire le jour, le mois et l'annÃ©e
+        const day = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10);
+        const year = parseInt(match[3], 10);
+        // Les mois en JavaScript sont de 0 (janvier) Ã  11 (dÃ©cembre)
+        const date = new Date(year, month - 1, day);
+        // VÃ©rifier si la date est valide
+        return (date.getFullYear() === year &&
+            date.getMonth() === month - 1 &&
+            date.getDate() === day);
+    }
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class LesFactures {
@@ -63,7 +80,7 @@ class LesFactures {
     all() {
         return this.load(APIsql.sqlWeb.SQLloadData(this.prepare(""), []));
     }
-    byNumFacture(num_fact) {
+    byNumFact(num_fact) {
         let facture = new UneFacture;
         const factures = this.load(APIsql.sqlWeb.SQLloadData(this.prepare("num_fact = ?"), [num_fact]));
         const lesCles = Object.keys(factures);
@@ -88,14 +105,44 @@ class LesFactures {
     }
     insert(facture) {
         let sql; // requête de manipulation : utiliser SQLexec
-        sql = "INSERT INTO facture(num_fact, date_fact, comment_fact, taux_remise_fact, id_cli, id_forfait) VALUES (?, ?, ?, ?, ?)";
-        return APIsql.sqlWeb.SQLexec(sql, [facture.numFact, facture.commentFact, facture.dateFact, facture.tauxRemiseFact, facture.idCli, facture.idForfait]);
+        sql = "INSERT INTO facture(num_fact, date_fact,	comment_fact, taux_remise_fact, id_cli, id_forfait ) VALUES	(?, ?, ?, ?, ?, ?)";
+        return APIsql.sqlWeb.SQLexec(sql, [facture.numFact, this.convertDateToEnglish(facture.dateFact), facture.commentFact, facture.tauxRemiseFact, facture.idCli, facture.idForfait]);
     }
     update(facture) {
         let sql;
         sql = "UPDATE facture SET date_fact = ?, comment_fact = ?, taux_remise_fact = ?, id_cli = ?, id_forfait = ? ";
-        sql += " WHERE num_fact = ?"; // requête de manipulation : utiliser SQLexec
-        return APIsql.sqlWeb.SQLexec(sql, [facture.dateFact, facture.commentFact, facture.tauxRemiseFact, facture.idCli, facture.idForfait]);
+        sql += " WHERE	 num_fact	= ?"; // requête de manipulation : utiliser SQLexec
+        return APIsql.sqlWeb.SQLexec(sql, [this.convertDateToEnglish(facture.dateFact), facture.commentFact, facture.tauxRemiseFact, facture.idCli, facture.idForfait, facture.numFact]);
+    }
+    numDerniereFacture(listeFactures) {
+        // Renvoie le numéro de la dernière facture
+        let numero = 0;
+        for (let i in listeFactures) {
+            const facture = listeFactures[i];
+            if (!facture) {
+                break; //Si la facture n'existe pas, on a atteint la fin du tableau
+            }
+            numero = Number(facture.numFact);
+        }
+        return numero;
+    }
+    dateDuJour() {
+        // Renvoie la date du jour au format jj/mm/aaaa
+        const dateDuJour = new Date();
+        const jour = dateDuJour.getDate(); // Obtiens le jour du mois (1-31)
+        const mois = dateDuJour.getMonth() + 1; // Obtiens le mois (0-11) donc on y ajoute 1
+        const annee = dateDuJour.getFullYear(); // Obtiens l'année complète (aaaa)
+        // Formatage de la date du jour
+        const dateFormatee = `${jour < 10 ? '0' : ''}${jour}/${mois < 10 ? '0' : ''}${mois}/${annee}`;
+        return dateFormatee;
+    }
+    convertDateToFrench(dateStr) {
+        const [annee, mois, jour] = dateStr.split('-');
+        return `${jour}/${mois}/${annee}`;
+    }
+    convertDateToEnglish(dateStr) {
+        const [jour, mois, annee] = dateStr.split('/');
+        return `${annee}-${mois}-${jour}`;
     }
 }
 export { connexion };

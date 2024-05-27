@@ -25,10 +25,26 @@
     grid-template-columns : 1fr 1fr; 
     border-bottom : 2px solid #808080;  
 }
+
+.facture_remise {
+    width: 50px;
+}
   
 .produit_rubrique{
     display 	: grid;
     grid-template-columns : 1fr 1fr; 
+}
+
+.facture_commentaire_produit {
+    display: inline-block;
+    margin-top: 10px;
+	margin-left: 5px;
+    font-size: 14px;
+    padding: 5px;
+	padding-bottom: 10px;
+    white-space: pre-line; /* To maintain line breaks in the text */
+	text-align: left;
+	max-height: 45%;
 }
 
 #btn_produit_valider {

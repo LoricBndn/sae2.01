@@ -3,7 +3,7 @@
 
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Edition d'une facture</title>
+    <title>Facture</title>
     <link type="text/css" rel="stylesheet" href="./css/sae.css">
     <link type="text/css" rel="stylesheet" href="./css/facture_edit.css">
 </head>
@@ -21,7 +21,10 @@
             </div>
             <div>
                 <label for="edt_facture_date">le</label>
-                <span><input id="edt_facture_date" size="10" type="date"></span>
+                <span>
+                    <input id="edt_facture_date" size="10" type="date">
+                    <label id="lbl_erreur_date" class="labelerreur"></label>
+                </span>
                 <span><textarea id="edt_facture_commentaire" placeholder="Commentaire non obligatoire" cols="140"
                     rows="4"></textarea></span>
             </div>
@@ -33,7 +36,7 @@
             </div>
             <div>
                 <label for="edt_facture_codeclient">Code</label>
-                <span><input id="edt_facture_codeclient" placeholder="code client" size="5" type="text"></span>
+                <span><input id="edt_facture_codeclient" placeholder="n° client" size="5" type="text"></span>
                 <label id="lbl_facture_detail_client" class="facture_commentaire"></label>
             </div>
         </div>
@@ -50,7 +53,10 @@
             </div>
             <div>
                 <label for="edt_facture_remise">Remise</label>
-                <span><input type="number" id="edt_experience" size="1"/>%</span>
+                <span>
+                    <input type="number" id="edt_facture_remise" class="facture_remise" size="1"/>
+                    <label for="edt_facture_remise">%</label>
+                </span>
                 <label id="lbl_erreur_remise" class="labelerreur"></label>
             </div>
         </div>
@@ -100,10 +106,7 @@
                 <div class="produit_rubrique">
                     <div>
                         <select id="select_produit" size="6"></select>
-                        <label id="lbl_facture_detail_produit" class="facture_commentaire"></label>
-                        <div>
-                            <label id="lbl_erreur_select_produit" class="labelerreur"></label>
-                        </div>
+                        <label id="lbl_facture_detail_produit" class="facture_commentaire_produit"></label>
                     </div>
                     <div>
                         <label for="edt_produit_qte">quantité</label>
@@ -115,6 +118,9 @@
                             <input id="btn_produit_valider" type="button">
                             <input id="btn_produit_annuler" type="button">
                         </div>
+                    </div>
+                    <div>
+                        <label id="lbl_erreur_select_produit" class="labelerreur"></label>
                     </div>
                 </div>
             </div>
@@ -128,6 +134,4 @@
     </div>
 </body>
 <script type="module" src="../controleur/facture_edit.js"></script>
-
-
 </html>

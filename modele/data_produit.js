@@ -1,4 +1,4 @@
-import { connexion, APIsql } from "../modele/connexion.js";
+import { connexion, APIsql } from "./connexion.js";
 class UnTypProduit {
     constructor(code_prod = "", lib_prod = "", type = "", origine = "", conditionnement = "", tarif_ht = "") {
         // initialisation à l’instanciation
@@ -34,6 +34,11 @@ class UnTypProduit {
             tarifHt: this._tarifHt,
         };
         return tableau;
+    }
+    getMontantProduit(typProduitByFacture) {
+        // renvoie le montant à payer pour un produit par rapport à son prix unitaire et sa qte
+        const montantProduit = typProduitByFacture.qteProd * Number(typProduitByFacture.unTypProduit.tarifHt);
+        return montantProduit;
     }
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -98,7 +103,7 @@ class UnTypProduitByFacture {
         // renvoie l’objet sous la forme d’un tableau associatif
         // pour un affichage dans une ligne d’un tableau HTML
         let tableau = this.unTypProduit.toArray(); // appel de la méthode « toArray » de « UnTypProduit »
-        tableau['qte_prod'] = this.qteProd.toFixed(0);
+        tableau['qteProd'] = this.qteProd.toFixed(0);
         return tableau;
     }
 }
@@ -129,11 +134,11 @@ class LesTypProduitsByFacture {
         return sql;
     }
     byNumFact(num_fact) {
-        // renvoie le tableau d’objets contenant tous les produits de la facture num fact
+        // renvoie le tableau d’objets contenant tous les produits de la facture num_fact
         return this.load(APIsql.sqlWeb.SQLloadData(this.prepare("num_fact = ?"), [num_fact]));
     }
     byNumFactureCodeProd(num_fact, code_prod) {
-        // renvoie l’objet de l’équipement code_prod contenu dans la salle num_fact
+        // renvoie l’objet du produit code_prod contenu dans la facture num_fact
         let typProduitByFacture = new UnTypProduitByFacture;
         let typProduitsByFacture = this.load(APIsql.sqlWeb.SQLloadData(this.prepare("num_fact = ? and code_prod = ?"), [num_fact, code_prod]));
         if (!typProduitsByFacture[0] === undefined) {
@@ -149,38 +154,23 @@ class LesTypProduitsByFacture {
         }
         return T;
     }
-    getMontantProduit(produit) {
-        // renvoie le montant Ã  payer pour un produit par rapport Ã  son tarif HT et sa qte
-        const montantProduit = produit.qteProd * Number(produit.unTypProduit.tarifHt);
-        return montantProduit;
-    }
     getTotalMontantSansRemise(typProduits) {
         // renvoie le montant total d'une facture sans remise
-        let total = 0;
+        let totalHt = 0;
         for (let id in typProduits) {
-            const produit = typProduits[id];
-            total += Number(produit.unTypProduit.tarifHt) * produit.qteProd;
+            totalHt += typProduits[id].unTypProduit.getMontantProduit(typProduits[id]);
         }
-        return total;
-    }
-    getTotalMontantAvecRemise(typProduits, uneFacture) {
-        // renvoie le montant total d’une facture avec remise
-        const totalHt = this.getTotalMontantSansRemise(typProduits);
-        // Calcul du montant total de la remise sur la facture
-        const totalRemise = this.getTotalMontantRemise(typProduits, uneFacture);
-        const totalAPayer = totalHt - totalRemise;
-        return totalAPayer;
+        return totalHt;
     }
     getTotalMontantRemise(typProduits, uneFacture) {
         // renvoie le montant total de la remise sur la facture
-        let totalRemise = 0;
-        for (let id in typProduits) {
-            // Calcul de la remise pour ce produit
-            const remise = Number(typProduits[id].unTypProduit.tarifHt) * typProduits[id].qteProd * (Number(uneFacture.tauxRemiseFact) / 100);
-            // Ajout de la remise au total
-            totalRemise += remise;
-        }
+        const totalRemise = this.getTotalMontantSansRemise(typProduits) * (Number(uneFacture.tauxRemiseFact) / 100);
         return totalRemise;
+    }
+    getTotalMontantAvecRemise(typProduits, uneFacture) {
+        // renvoie le montant total d’une facture avec remise
+        const totalAPayer = this.getTotalMontantSansRemise(typProduits) - this.getTotalMontantRemise(typProduits, uneFacture);
+        return totalAPayer;
     }
     delete(num_fact) {
         let sql;

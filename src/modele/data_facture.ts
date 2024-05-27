@@ -13,7 +13,7 @@ class UneFacture {
         this._commentFact = comment_fact;
         this._tauxRemiseFact = taux_remise_fact;
         this._idCli = id_cli;
-        this._idForfait = id_forfait;    
+        this._idForfait = id_forfait;
     }
 
     // définition des « getters » et des « setters » pour les attributs privés de la classe
@@ -29,25 +29,40 @@ class UneFacture {
     set idCli(id_cli: string) { this._idCli = id_cli; }
     get idForfait(): string { return this._idForfait; }
     set idForfait(id_forfait: string) { this._idForfait = id_forfait; }
-    
+
     toArray(): APIsql.TtabAsso {
         // renvoie l’objet sous la forme d’un tableau associatif
         // pour un affichage dans une ligne d’un tableau HTML
         const tableau: APIsql.TtabAsso = {
-            numFact: this._numFact, 
-            dateFact: this._dateFact, 
-            commentFact: this._commentFact, 
-            tauxRemiseFact: this._tauxRemiseFact, 
-            idCli: this._idCli, 
-            idForfait: this._idForfait
+            'numFact': this._numFact, 'dateFact': this._dateFact
+            , 'commentFact': this._commentFact, 'tauxRemiseFact': this._tauxRemiseFact
+            , 'idCli': this._idCli, 'idForfait': this._idForfait
         };
         return tableau;
     }
 
-    convertDateToFrench(dateStr: string): string {
-        const [year, month, day] = dateStr.split('-');
-        return `${day}/${month}/${year}`;
-    }
+    estDateValide(dateString: string): boolean {	//VÃ©rifie Ã  partir d'une string d'une date au format jj/mm/aaaa si celle-ci est valide
+		const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    	const match = dateString.match(regex);
+		if (!match) {
+			return false;
+		}
+		
+		// Extraire le jour, le mois et l'annÃ©e
+		const day = parseInt(match[1], 10);
+		const month = parseInt(match[2], 10);
+		const year = parseInt(match[3], 10);
+	
+		// Les mois en JavaScript sont de 0 (janvier) Ã  11 (dÃ©cembre)
+		const date = new Date(year, month - 1, day);
+	
+		// VÃ©rifier si la date est valide
+		return (
+			date.getFullYear() === year &&
+			date.getMonth() === month - 1 &&
+			date.getDate() === day
+		);
+	}
 }
 
 type TFactures = { [key: string]: UneFacture }; // tableau d’objets UneFacture
@@ -90,7 +105,8 @@ class LesFactures { // définition de la classe gérant les données de la table
 
     byNumFact(num_fact: string): UneFacture { // renvoie l’objet correspondant à la facture num_fact
         let facture = new UneFacture;
-        const factures: TFactures = this.load(APIsql.sqlWeb.SQLloadData(this.prepare("num_fact = ?"), [num_fact]));
+        const factures: TFactures = this.load(APIsql.sqlWeb.SQLloadData(this.prepare("num_fact = ?")
+            , [num_fact]));
         const lesCles: string[] = Object.keys(factures);
         // affecte les clés du tableau associatif « factures » dans le tableau de chaines « lesCles »
         if (lesCles.length > 0) {
@@ -114,21 +130,21 @@ class LesFactures { // définition de la classe gérant les données de la table
         return APIsql.sqlWeb.SQLexec(sql, [num_fact]); // requête de manipulation : utiliser SQLexec
     }
 
-    insert(facture: UneFacture): boolean { // requête d’ajout d’une facture dans la table
-        let sql: string; // requête de manipulation : utiliser SQLexec
-        sql = "INSERT INTO facture(num_fact, date_fact, comment_fact, taux_remise_fact, id_cli, id_forfait) VALUES (?, ?, ?, ?, ?, ?)";
-        return APIsql.sqlWeb.SQLexec(sql, [facture.numFact, facture.dateFact, facture.commentFact, facture.tauxRemiseFact, facture.idCli, facture.idForfait]);
-    }
-    
-    update(facture: UneFacture): boolean { // requête de modification d’une facture dans la table
-        let sql: string;
-        sql = "UPDATE facture SET date_fact = ?, comment_fact = ?, taux_remise_fact = ?, id_cli = ?, id_forfait = ? ";
-        sql += " WHERE num_fact = ?"; // requête de manipulation : utiliser SQLexec
-        return APIsql.sqlWeb.SQLexec(sql, [facture.dateFact, facture.commentFact, facture.tauxRemiseFact, facture.idCli, facture.idForfait]);
-    }
+    insert(facture : UneFacture):boolean {	// requête d'ajout d'une facture dans la table
+		let sql : string; // requête de manipulation : utiliser SQLexec
+		sql	= "INSERT INTO facture(num_fact, date_fact,	comment_fact, taux_remise_fact, id_cli, id_forfait ) VALUES	(?, ?, ?, ?, ?, ?)";
+		return APIsql.sqlWeb.SQLexec(sql,[facture.numFact, this.convertDateToEnglish(facture.dateFact), facture.commentFact, facture.tauxRemiseFact, facture.idCli, facture.idForfait]); 	
+	}
+
+	update(facture : UneFacture):boolean {		// requête de modification d'une facture dans la table
+		let sql : string;
+		sql	= "UPDATE facture SET date_fact = ?, comment_fact = ?, taux_remise_fact = ?, id_cli = ?, id_forfait = ? ";
+		sql += " WHERE	 num_fact	= ?"; 	// requête de manipulation : utiliser SQLexec
+		return APIsql.sqlWeb.SQLexec(sql,[this.convertDateToEnglish(facture.dateFact), facture.commentFact, facture.tauxRemiseFact, facture.idCli, facture.idForfait, facture.numFact]); 	
+	}
 
     numDerniereFacture(listeFactures: TFactures): number {
-		// renvoie le numéro de la dernière facture
+		// Renvoie le numéro de la dernière facture
 		let numero = 0;
 		for (let i in listeFactures) {
 		  const facture = listeFactures[i];
@@ -141,7 +157,7 @@ class LesFactures { // définition de la classe gérant les données de la table
 	}
 
     dateDuJour(): string {
-		// renvoie la date du jour au format jj/mm/aaaa
+		// Renvoie la date du jour au format jj/mm/aaaa
 		const dateDuJour = new Date();
 
 		const jour = dateDuJour.getDate(); // Obtiens le jour du mois (1-31)
@@ -153,6 +169,16 @@ class LesFactures { // définition de la classe gérant les données de la table
 
 		return dateFormatee;
 	}
+
+    convertDateToFrench(dateStr: string): string {
+        const [annee, mois, jour] = dateStr.split('-');
+        return `${jour}/${mois}/${annee}`;
+    }
+
+    convertDateToEnglish(dateStr: string): string {
+        const [jour, mois, annee] = dateStr.split('/');
+        return `${annee}-${mois}-${jour}`;
+    }
 }
 export { connexion }
 export { UneFacture }

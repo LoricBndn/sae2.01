@@ -1,4 +1,4 @@
-import { connexion, APIsql } from "../modele/connexion.js";
+import { connexion, APIsql } from "./connexion.js";
 class UnClient {
     constructor(id_cli = "", civ_cli = "", nom_cli = "", prenom_cli = "", tel_cli = "", mel_cli = "", adr_cli = "", cp_cli = "", commune_cli = "", tauxmax_remise_cli = "") {
         // initialisation à l’instanciation
@@ -77,7 +77,7 @@ class LesClients {
     all() {
         return this.load(APIsql.sqlWeb.SQLloadData(this.prepare(""), []));
     }
-    byIdClient(id_cli) {
+    byIdCli(id_cli) {
         let client = new UnClient;
         const clients = this.load(APIsql.sqlWeb.SQLloadData(this.prepare("id_cli = ?"), [id_cli]));
         const lesCles = Object.keys(clients);

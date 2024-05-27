@@ -23,12 +23,12 @@ class VueFactureListe {
             balisea.onclick = function () { vueFactureListe.detailFactureClick(uneFacture.numFact); };
             tr.insertCell().appendChild(balisea); // création nlle cellule dans ligne
             tr.insertCell().textContent = uneFacture.numFact;
-            tr.insertCell().textContent = this.convertDateToFrench(uneFacture.dateFact);
+            tr.insertCell().textContent = lesFactures.convertDateToFrench(uneFacture.dateFact);
             tr.insertCell().textContent = uneFacture.idCli;
-            tr.insertCell().textContent = lesClients.byIdClient(uneFacture.idCli).nomCli;
-            tr.insertCell().textContent = lesClients.byIdClient(uneFacture.idCli).communeCli;
-            tr.insertCell().textContent = lesTypProduitsByFacture.getTotalMontantSansRemise(lesTypProduitsByFacture.byNumFact(num)).toFixed(0) + " €";
-            tr.insertCell().textContent = lesTypProduitsByFacture.getTotalMontantAvecRemise(lesTypProduitsByFacture.byNumFact(num), uneFacture).toFixed(0) + " €";
+            tr.insertCell().textContent = lesClients.byIdCli(uneFacture.idCli).nomCli;
+            tr.insertCell().textContent = lesClients.byIdCli(uneFacture.idCli).communeCli;
+            tr.insertCell().textContent = lesTypProduitsByFacture.getTotalMontantSansRemise(lesTypProduitsByFacture.byNumFact(num)).toFixed(2) + " €";
+            tr.insertCell().textContent = lesTypProduitsByFacture.getTotalMontantAvecRemise(lesTypProduitsByFacture.byNumFact(num), uneFacture).toFixed(2) + " €";
             tr.insertCell().textContent = lesForfaits.byIdForfait(uneFacture.idForfait).mtForfait + " €";
             // création balise <a> pour appel page modification du détail de la facture
             balisea = document.createElement("a");
@@ -59,10 +59,6 @@ class VueFactureListe {
     ajouterFactureClick() {
         // redirection vers « facture_edit.html »avec indication du statut « ajout »
         location.href = "facture_edit.html?ajout";
-    }
-    convertDateToFrench(dateStr) {
-        const [year, month, day] = dateStr.split('-');
-        return `${day}/${month}/${year}`;
     }
 }
 let vueFactureListe = new VueFactureListe;

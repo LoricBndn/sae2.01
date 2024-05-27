@@ -1,4 +1,4 @@
-import { connexion, APIsql } from "../modele/connexion.js"
+import { connexion, APIsql } from "./connexion.js"
 class UnClient { // définition de la classe gérant les données d’un client
     private _idCli: string;
     private _civCli: string;
@@ -51,16 +51,11 @@ class UnClient { // définition de la classe gérant les données d’un client
     toArray(): APIsql.TtabAsso { // renvoie l’objet sous la forme d’un tableau associatif
         // pour un affichage dans une ligne d’un tableau HTML
         let tableau: APIsql.TtabAsso = {
-            idCli: this.idCli, 
-            civCli: this.civCli,
-            nomCli: this.nomCli, 
-            prenomCli: this.prenomCli, 
-            telCli: this.telCli, 
-            melCli: this.melCli, 
-            adrCli: this.adrCli, 
-            cpCli: this.cpCli, 
-            communeCli: this.communeCli, 
-            tauxmaxRemiseCli: this.tauxmaxRemiseCli
+            'idCli': this.idCli, 'civCli': this.civCli,
+            'nomCli': this.nomCli, 'prenomCli': this.prenomCli, 
+            'telCli': this.telCli, 'melCli': this.melCli, 
+            'adrCli': this.adrCli, 'cpCli': this.cpCli, 
+            'communeCli': this.communeCli, 'tauxmaxRemiseCli': this.tauxmaxRemiseCli
         };
         return tableau;
     }
@@ -116,7 +111,7 @@ class LesClients { // définition de la classe gérant les données de la table 
         }
         return client;
     }
-    
+
     toArray(clients : TClients) : APIsql.TdataSet {
     // renvoie le tableau d’objets sous la forme d’un tableau de tableaux associatifs
     // pour un affichage dans un tableau HTML

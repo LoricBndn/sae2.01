@@ -1,4 +1,4 @@
-import { connexion, APIsql } from "../modele/connexion.js";
+import { connexion, APIsql } from "./connexion.js";
 class UnForfait {
     constructor(id_forfait = "", lib_forfait = "", mt_forfait = "") {
         // initialisation à l’instanciation

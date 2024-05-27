@@ -1,4 +1,4 @@
-import * as APIsql from "../modele/sqlWeb.js"
+import * as APIsql from "./sqlWeb.js"
 
 APIsql.sqlWeb.init("https://devweb.iutmetz.univ-lorraine.fr/~bondon3u/1A/SAE%202.01/vue/","https://devweb.iutmetz.univ-lorraine.fr/~nitschke5/ihm/IHM_API/")
 

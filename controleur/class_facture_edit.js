@@ -7,6 +7,8 @@ class VueFactureEdit {
     get params() { return this._params; }
     get grille() { return this._grille; }
     get erreur() { return this._erreur; }
+    get detailProduitSelect() { return this._detailProduitSelect; }
+    set detailProduitSelect(detail_produit_select) { this._detailProduitSelect = detail_produit_select; }
     initMsgErreur() {
         // les erreurs "champ vide", "valeur inconnue", "doublon"
         //sont les trois principales erreurs dans un formulaire
@@ -14,39 +16,21 @@ class VueFactureEdit {
         //création des 3 messages d'erreur + message pour correct
         // avec chaîne vide si pas d'erreur générée pour un type d'erreur potentielle
         this._erreur = {
-            edtNum: {
-                statut: 'vide',
-                msg: {
-                    correct: "",
-                    vide: "Le numéro de facture doit être renseigné.",
-                    inconnu: "Le numéro ne peut contenir que des lettres et des chiffres.",
-                    doublon: "Le numéro de facture est déjà attribué."
-                }
-            },
             edtDate: {
-                statut: 'vide',
+                statut: "vide",
                 msg: {
                     correct: "",
-                    vide: "La date doit être renseigné.",
-                    inconnu: "",
-                    doublon: ""
-                }
+                    vide: "La date doit être renseignée.",
+                    inconnu: "La date ne doit pas être postérieure à la date du jour.",
+                    doublon: "",
+                },
             },
             edtCodeClient: {
                 statut: 'vide',
                 msg: {
                     correct: "",
-                    vide: "Le client doit être renseigné.",
-                    inconnu: "Client inconnu.",
-                    doublon: ""
-                }
-            },
-            listeLiv: {
-                statut: 'vide',
-                msg: {
-                    correct: "",
-                    vide: "Aucune livraison choisie",
-                    inconnu: "",
+                    vide: "Le numéro de client doit être renseigné.",
+                    inconnu: "Numéro de client inconnu.",
                     doublon: ""
                 }
             },
@@ -54,8 +38,8 @@ class VueFactureEdit {
                 statut: 'vide',
                 msg: {
                     correct: "",
-                    vide: "La remise doit être un nombre entier supérieur à 0",
-                    inconnu: "",
+                    vide: "La remise doit être un nombre entier supérieur ou égal à 0",
+                    inconnu: "Le taux doit être compris entre 0 et le taux maximum accordé au client",
                     doublon: ""
                 }
             },
@@ -97,29 +81,71 @@ class VueFactureEdit {
         this.initMsgErreur();
         let titre;
         switch (this.params[0]) {
-            case 'suppr':
+            case "suppr":
                 titre = "Suppression d'une facture";
                 break;
-            case 'ajout':
+            case "ajout":
                 titre = "Nouvelle facture";
                 break;
-            case 'modif':
+            case "modif":
                 titre = "Modification d'une facture";
                 break;
             default: titre = "Détail d'une facture";
         }
         this.form.divTitre.textContent = titre;
-        const lesFactures = new LesFactures;
-        const lesTypProduits = new LesTypProduits;
-        const affi = this.params[0] === 'affi';
-        if (this.params[0] !== 'ajout') { // affi ou modif ou suppr
-            const facture = lesFactures.byNumFacture(this._params[1]);
-            const produit = lesTypProduits.byCodeProd(this._params[2]);
+        this.form.listeLiv.innerHTML = "";
+        const lesFactures = new LesFactures();
+        const lesForfaits = new LesForfaits();
+        const affi = this.params[0] === "affi";
+        this._detailProduitSelect = "";
+        if (this.params[0] === "ajout") {
+            let listeFactures = lesFactures.all();
+            let listeLivraison = lesForfaits.all();
+            let i = 0;
+            let k;
+            const numNouvelleFact = lesFactures.numDerniereFacture(listeFactures) + 1;
+            const dateDuJour = lesFactures.dateDuJour();
+            const remiseParDefaut = 0;
+            this.form.edtNum.value = numNouvelleFact.toFixed(0);
+            this.form.edtDate.value = lesFactures.convertDateToEnglish(dateDuJour);
+            for (let j in listeLivraison) {
+                if (i === 0) {
+                    k = j;
+                }
+                const forfait = listeLivraison[j];
+                const option = document.createElement("option");
+                option.value = forfait.idForfait;
+                option.text = forfait.libForfait;
+                this.form.listeLiv.appendChild(option);
+                i = 1;
+            }
+            this.form.listeLiv.value = listeLivraison[k].idForfait;
+            this.form.edtRemise.value = remiseParDefaut.toFixed(0);
+            this.form.edtNum.readOnly = true;
+            this.form.edtDate.readOnly = affi;
+            this.form.edtCommentaire.readOnly = affi;
+            this.form.edtCodeClient.readOnly = affi;
+            this.form.listeLiv.disabled = affi;
+            this.form.edtRemise.readOnly = affi;
+            this.detailForfait(vueFactureEdit.form.listeLiv.value);
+        }
+        else {
+            // affi ou modif ou suppr
+            const facture = lesFactures.byNumFact(this._params[1]);
+            const forfait = lesForfaits.byIdForfait(facture.idForfait);
+            let listeLivraison = lesForfaits.all();
             this.form.edtNum.value = facture.numFact;
             this.form.edtDate.value = facture.dateFact;
             this.form.edtCommentaire.value = facture.commentFact;
             this.form.edtCodeClient.value = facture.idCli;
-            this.form.listeLiv.value = facture.idForfait;
+            for (const j in listeLivraison) {
+                const forfait = listeLivraison[j];
+                const option = document.createElement("option");
+                option.value = forfait.idForfait;
+                option.text = forfait.libForfait;
+                this.form.listeLiv.appendChild(option);
+            }
+            this.form.listeLiv.value = forfait.idForfait;
             this.form.edtRemise.value = facture.tauxRemiseFact;
             this.form.edtNum.readOnly = true;
             this.form.edtDate.readOnly = affi;
@@ -127,10 +153,8 @@ class VueFactureEdit {
             this.form.edtCodeClient.readOnly = affi;
             this.form.listeLiv.disabled = affi;
             this.form.edtRemise.readOnly = affi;
-            this.erreur.edtNum.statut = "correct";
-            this.detailForfait(facture.idForfait);
-            this.detailClient(facture.idCli);
-            this.detailProduit(produit.libProd);
+            this.detailClient(String(facture.idCli));
+            this.detailForfait(vueFactureEdit.form.listeLiv.value);
         }
         this.affiProduit();
         if (this.params[0] === 'suppr') {
@@ -143,13 +167,24 @@ class VueFactureEdit {
         this.form.btnAjouterProduit.hidden = affi;
         // définition des événements
         this.form.edtCodeClient.onchange = function () {
-            vueFactureEdit.detailClient(vueFactureEdit.form.edtCodeClient.value);
+            vueFactureEdit.detailClient(String(vueFactureEdit.form.edtCodeClient.value));
         };
         this.form.listeLiv.onchange = function () {
-            vueFactureEdit.detailForfait(vueFactureEdit.form.listeLiv.value);
+            vueFactureEdit.detailForfait(String(vueFactureEdit.form.listeLiv.value));
         };
+        this.form.edtRemise.onchange = function () {
+            vueFactureEdit.calculRemise(String(vueFactureEdit.form.edtRemise.value));
+        };
+        this.form.listeProduit.addEventListener('mouseover', (event) => {
+            const target = event.target;
+            const codeProd = target.value;
+            vueFactureEdit.detailProduitSurvol(String(codeProd));
+        });
+        this.form.listeProduit.addEventListener('mouseout', () => {
+            vueFactureEdit.form.lblDetailProduit.textContent = this.detailProduitSelect;
+        });
         this.form.listeProduit.onchange = function () {
-            vueFactureEdit.detailProduit(vueFactureEdit.form.listeProduit.value);
+            vueFactureEdit.detailProduitSelect = vueFactureEdit.detailProduitClick(String(vueFactureEdit.form.listeProduit.value));
         };
         this.form.btnRetour.onclick = function () { vueFactureEdit.retourClick(); };
         this.form.btnAnnuler.onclick = function () { vueFactureEdit.retourClick(); };
@@ -166,7 +201,7 @@ class VueFactureEdit {
         err.statut = "correct";
         const chaine = valeur.trim();
         if (chaine.length > 0) {
-            const client = lesClients.byIdClient(chaine);
+            const client = lesClients.byIdCli(chaine);
             if (client.idCli !== "") { // client trouvé
                 detail.textContent
                     = client.civCli + " " + client.nomCli + " " + client.prenomCli + "\r\n"
@@ -183,11 +218,9 @@ class VueFactureEdit {
             err.statut = 'vide';
     }
     detailForfait(valeur) {
-        const err = this.erreur.listeLiv;
         const lesForfaits = new LesForfaits;
         const detail = this.form.lblDetailLiv;
         detail.textContent = "";
-        err.statut = "correct";
         const chaine = valeur.trim();
         if (chaine.length > 0) {
             const forfait = lesForfaits.byIdForfait(chaine);
@@ -195,35 +228,48 @@ class VueFactureEdit {
                 detail.textContent
                     = forfait.libForfait + "\r\n" + forfait.mtForfait + " €";
             }
-            else {
-                err.statut = 'inconnu';
-                detail.textContent = err.msg.inconnu;
-            }
         }
-        else
-            err.statut = 'vide';
     }
-    detailProduit(valeur) {
-        const err = this.erreur.listeProduit;
+    calculRemise(valeur) {
+        const detailRemise = this.form.lblRemise;
+        const detailAPayer = this.form.lblApayer;
+        const detailHT = this.form.lblHt;
+        detailAPayer.textContent = "";
+        detailRemise.textContent = "";
+        let prix = 0;
+        let remise = 0;
+        for (let id in this.grille) {
+            const unTypProduitByFacture = this.grille[id];
+            prix = unTypProduitByFacture.qteProd * Number(unTypProduitByFacture.unTypProduit.tarifHt);
+            remise += Number(valeur) / 100 * prix;
+        }
+        detailRemise.textContent = remise.toFixed(2);
+        detailAPayer.textContent = (Number(detailHT.textContent) - remise).toFixed(2);
+    }
+    detailProduitSurvol(codeProd) {
         const lesTypProduits = new LesTypProduits;
         const detail = this.form.lblDetailProduit;
-        detail.textContent = "";
-        err.statut = "correct";
-        const chaine = valeur.trim();
-        if (chaine.length > 0) {
-            const produit = lesTypProduits.byCodeProd(chaine);
-            if (produit.codeProd !== "") { // produit trouvé
-                detail.textContent
-                    = produit.type + "\r\n" + produit.conditionnement + "cl" + "\r\n"
-                        + produit.origine + "\r\n" + produit.tarifHt + " €";
-            }
-            else {
-                err.statut = 'inconnu';
-                detail.textContent = err.msg.inconnu;
-            }
+        const produit = lesTypProduits.byCodeProd(codeProd);
+        if (produit.codeProd !== "") { // produit trouvé
+            detail.textContent
+                = produit.type + "\r\n" + produit.conditionnement + "cl" + "\r\n"
+                    + produit.origine + "\r\n" + produit.tarifHt + " €";
         }
-        else
-            err.statut = 'vide';
+    }
+    detailProduitClick(codeProd) {
+        const lesTypProduits = new LesTypProduits;
+        const detail = this.form.lblDetailProduit;
+        const produit = lesTypProduits.byCodeProd(codeProd);
+        if (produit.codeProd !== "") { // produit trouvé
+            detail.textContent
+                = produit.type + "\r\n" + produit.conditionnement + "cl" + "\r\n"
+                    + produit.origine + "\r\n" + produit.tarifHt + " €";
+            return produit.type + "\r\n" + produit.conditionnement + "cl" + "\r\n"
+                + produit.origine + "\r\n" + produit.tarifHt + " €";
+        }
+        else {
+            return "";
+        }
     }
     affiProduit() {
         const lesTypProduitsByFacture = new LesTypProduitsByFacture();
@@ -235,8 +281,6 @@ class VueFactureEdit {
             this.form.tableProduit.rows[1].remove();
         }
         let ht = 0;
-        let remise = 0;
-        let apayer = 0;
         for (let id in this._grille) {
             const unTypProduitByFacture = this.grille[id];
             const tr = this.form.tableProduit.insertRow();
@@ -262,12 +306,9 @@ class VueFactureEdit {
                 tr.insertCell().appendChild(balisea);
             }
             ht += Number(unTypProduitByFacture.unTypProduit.tarifHt) * unTypProduitByFacture.qteProd;
-            remise += ht / 10;
-            apayer = ht - remise;
         }
-        this.form.lblHt.textContent = ht.toString();
-        this.form.lblRemise.textContent = remise.toString();
-        this.form.lblApayer.textContent = apayer.toString();
+        this.form.lblHt.textContent = ht.toFixed(2);
+        this.calculRemise(String(vueFactureEdit.form.edtRemise.value));
     }
     supprimer(numFact) {
         if (confirm("Confirmez-vous la suppression de la facture " + numFact)) {
@@ -278,64 +319,73 @@ class VueFactureEdit {
         }
         this.retourClick();
     }
-    verifNum(valeur) {
+    verifDate(date) {
         const lesFactures = new LesFactures;
-        const err = this.erreur.edtNum;
+        const uneFacture = new UneFacture();
+        const err = this._erreur.edtDate;
+        const labelError = this.form.lblDateErreur;
+        const chaine = date.trim();
         err.statut = "correct";
-        const chaine = valeur.trim();
-        if (chaine.length > 0) {
-            if (!chaine.match(/^([a-zA-Z0-9]+)$/)) {
-                // expression régulière qui teste si la chaîne ne contient rien d'autre
-                // que des caractères alphabétiques minuscules ou majuscules et des chiffres
-                this.erreur.edtNum.statut = 'inconnu';
-            }
-            else if ((this.params[0] === 'ajout') && (lesFactures.idExiste(chaine))) {
-                this.erreur.edtNum.statut = 'doublon';
-            }
-        }
-        else
-            err.statut = 'vide';
-    }
-    verifDate(valeur) {
-        const err = this.erreur.edtDate;
-        err.statut = "correct";
-        const chaine = valeur.trim();
         if (chaine.length === 0) {
-            err.statut = 'vide';
+            err.statut = "vide";
+            labelError.textContent = err.msg.vide;
+        }
+        else if (!uneFacture.estDateValide(chaine)) {
+            err.statut = "inconnu";
+            labelError.textContent = err.msg.inconnu;
+        }
+        else {
+            const dateRécup = new Date(lesFactures.convertDateToEnglish(chaine));
+            const dateDuJour = new Date(lesFactures.convertDateToEnglish(lesFactures.dateDuJour()));
+            if (dateRécup > dateDuJour) {
+                err.statut = "inconnu";
+                labelError.textContent = err.msg.inconnu;
+            }
         }
     }
     verifCodeClient(valeur) {
-        const lesClients = new LesClients;
-        const err = this.erreur.edtNum;
+        const lesFactures = new LesFactures();
+        const err = this.erreur.edtCodeClient;
         err.statut = "correct";
         const chaine = valeur.trim();
         if (chaine.length > 0) {
-            if (!chaine.match(/^([a-zA-Z0-9]+)$/)) {
+            if (!chaine.match(/^([0-9]+)$/)) {
                 // expression régulière qui teste si la chaîne ne contient rien d'autre
-                // que des caractères alphabétiques minuscules ou majuscules et des chiffres
-                this.erreur.edtNum.statut = 'inconnu';
+                // que des chiffres
+                this.erreur.edtCodeClient.statut = 'inconnu';
             }
-            else if ((this.params[0] === 'ajout') && (lesClients.idExiste(chaine))) {
-                this.erreur.edtNum.statut = 'doublon';
+            else if ((this.params[0] === "ajout") && (lesFactures.idExiste(chaine))) {
+                this.erreur.edtCodeClient.statut = 'doublon';
             }
         }
         else
             err.statut = 'vide';
     }
-    verifLivraison(valeur) {
-        const err = this.erreur.edtDate;
+    verifRemise(valeur, client) {
+        const err = this._erreur.edtRemise;
+        const labelError = this.form.lblRemiseErreur;
+        const lesClients = new LesClients();
+        labelError.textContent = "";
         err.statut = "correct";
+        const chaineClient = client.trim();
         const chaine = valeur.trim();
-        if (chaine.length === 0) {
-            err.statut = 'vide';
-        }
-    }
-    verifRemise(valeur) {
-        const err = this.erreur.edtDate;
-        err.statut = "correct";
-        const chaine = valeur.trim();
-        if (chaine.length === 0) {
-            err.statut = 'vide';
+        if (chaineClient.length > 0) {
+            const leClient = lesClients.byIdCli(chaineClient);
+            if (chaine.length > 0) {
+                if (leClient.idCli !== "") {
+                    // Client trouvé
+                    if (Number(valeur) >= 0 && Number(valeur) <= 100 && Number(valeur) <= Number(leClient.tauxmaxRemiseCli)) {
+                    }
+                    else {
+                        err.statut = "inconnu";
+                        labelError.textContent = err.msg.inconnu;
+                    }
+                }
+            }
+            else {
+                err.statut = "vide";
+                labelError.textContent = err.msg.vide;
+            }
         }
     }
     traiteErreur(uneErreur, zone) {
@@ -351,30 +401,28 @@ class VueFactureEdit {
     }
     validerClick() {
         let correct = true;
-        this.verifNum(this._form.edtNum.value);
-        this.verifDate(this._form.edtDate.value);
+        const facture = new UneFacture;
+        const lesFactures = new LesFactures;
+        this.verifDate(lesFactures.convertDateToFrench(this._form.edtDate.value));
         this.verifCodeClient(this._form.edtCodeClient.value);
-        this.verifRemise(this._form.edtRemise.value);
+        this.verifRemise(this._form.edtRemise.value, this._form.edtCodeClient.value);
         if (JSON.stringify(this.grille) === '{}') {
             this._erreur.produit.statut = 'vide';
         }
         else
             this._erreur.produit.statut = "correct";
-        correct = this.traiteErreur(this._erreur.edtNum, this.form.lblNumErreur) && correct;
         correct = this.traiteErreur(this._erreur.edtDate, this.form.lblDateErreur) && correct;
         correct = this.traiteErreur(this._erreur.edtCodeClient, this.form.lblCodeClientErreur) && correct;
         correct = this.traiteErreur(this._erreur.edtRemise, this.form.lblRemiseErreur) && correct;
         correct = this.traiteErreur(this._erreur.produit, this.form.lblProduitErreur) && correct;
-        const lesFactures = new LesFactures;
-        const facture = new UneFacture;
         if (correct) {
             facture.numFact = this.form.edtNum.value;
-            facture.dateFact = this.form.edtDate.value;
+            facture.dateFact = lesFactures.convertDateToFrench(this.form.edtDate.value);
             facture.commentFact = this.form.edtCommentaire.value;
             facture.idCli = this.form.edtCodeClient.value;
             facture.idForfait = this.form.listeLiv.value;
             facture.tauxRemiseFact = this.form.edtRemise.value;
-            if (this._params[0] === 'ajout') {
+            if (this._params[0] === "ajout") {
                 lesFactures.insert(facture);
             }
             else {
@@ -392,6 +440,7 @@ class VueFactureEdit {
     // gestion des produits de la facture
     modifierProduitClick(id) {
         this.afficherProduitEdit();
+        this.detailProduitClick(id);
         const lesTypProduits = new LesTypProduits();
         const UnTypProduit = lesTypProduits.byCodeProd(id);
         this.form.listeProduit.length = 0;
